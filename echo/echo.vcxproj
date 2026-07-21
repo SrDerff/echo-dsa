@@ -114,6 +114,11 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Account.h" />
+    <ClInclude Include="Artist.h" />
+    <ClInclude Include="FileManger.h" />
+    <ClInclude Include="Library.h" />
+    <ClInclude Include="Playlist.h" />
     <ClInclude Include="Song.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

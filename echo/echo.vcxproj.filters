@@ -5,18 +5,47 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
+    <Filter Include="model">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
+    <Filter Include="files">
+      <UniqueIdentifier>{7337d2fd-0c55-4420-bfd1-a2ee945413c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="templates">
+      <UniqueIdentifier>{5edf36f2-f7f6-4cc4-9a77-46ac8edf302d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resources">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="services">
+      <UniqueIdentifier>{28ffa64a-7084-46c3-aac6-694b90457575}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Song.h">
+      <Filter>model</Filter>
+    </ClInclude>
+    <ClInclude Include="Artist.h">
+      <Filter>model</Filter>
+    </ClInclude>
+    <ClInclude Include="Account.h">
+      <Filter>model</Filter>
+    </ClInclude>
+    <ClInclude Include="FileManger.h">
+      <Filter>files</Filter>
+    </ClInclude>
+    <ClInclude Include="Playlist.h">
+      <Filter>services</Filter>
+    </ClInclude>
+    <ClInclude Include="Library.h">
+      <Filter>services</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
