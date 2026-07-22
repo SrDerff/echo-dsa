@@ -22,6 +22,9 @@
     <Filter Include="services">
       <UniqueIdentifier>{28ffa64a-7084-46c3-aac6-694b90457575}</UniqueIdentifier>
     </Filter>
+    <Filter Include="controllers">
+      <UniqueIdentifier>{950d398d-e0ec-478c-bbeb-3a5363bb399c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -46,6 +49,15 @@
     </ClInclude>
     <ClInclude Include="Library.h">
       <Filter>services</Filter>
+    </ClInclude>
+    <ClInclude Include="AppController.h">
+      <Filter>controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="EchoService.h">
+      <Filter>services</Filter>
+    </ClInclude>
+    <ClInclude Include="HashTable.h">
+      <Filter>templates</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

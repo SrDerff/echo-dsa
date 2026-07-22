@@ -1,77 +1,144 @@
 #pragma once
 
 #include <vector>
+#include <optional>
+#include <utility>
 
-template<typename K, typename V, typename Hash>
+template<typename K, typename V, typename Hash = std::hash<K>>
 class HashTable {
 private:
-	//hash node class
-	class HashNode {
-	public:
-		K key;
-		V value;
+    enum class STATE {
+        EMPTY,
+        DELETED,
+        OCCUPIED
+    };
 
-		HashNode(const &_key, const&_value) {
-			key = _key;
-			value = _value;
-		}
-	};
+    struct HashNode {
+        K key;
+        V value;
+        STATE state = STATE::EMPTY;
 
-	//attributes
-	std::vector<HashNode*>bucket;
-	size_t currSize;
-	size_t capacity;
-	const float LOAD_FACTOR = 0.75;
-	Hash hash;
+        HashNode(const K& key, const V& value)
+            : key(key), value(value), state(STATE::OCCUPIED) {}
 
-	//private methods
-	void reSize() {
-		//copy the actual bucket
-		std::vector<HashNode*> oldTable=bucket;
+        HashNode() = default;
+    };
 
-		//clear bucket
-		bucket.clear();
-		//expand size
-		capacity *= 2;
-		//resize bucket
-		bucket.resize(capacity);
+    std::vector<std::optional<HashNode>> bucket;
+    size_t currSize;
+    size_t capacity;
+    size_t deletedCount;
+    static constexpr float LOAD_FACTOR = 0.75f;
+    Hash hash;
 
-		for (auto& node : oldTable) {
-			
-		}
-	}
+    void rehash() {
+        std::vector<std::optional<HashNode>> oldTable = std::move(bucket);
+        capacity *= 2;
+        bucket.assign(capacity, std::nullopt);
+        currSize = 0;
+        deletedCount = 0;
+
+        for (auto& node : oldTable) {
+            if (!node.has_value()) continue;
+            if (node->state != STATE::OCCUPIED) continue;
+            insert(node->key, node->value);
+        }
+    }
+
+        size_t findIndex(const K& key) const {
+            size_t index = hash(key) % capacity;
+            size_t probed = 0;
+
+            while (probed < capacity) {
+                if (!bucket[index].has_value())
+                    return capacity;
+
+                if (bucket[index]->state == STATE::OCCUPIED &&
+                    bucket[index]->key == key)
+                {
+                    return index;
+                }
+
+                index = (index + 1) % capacity;
+                ++probed;
+            }
+
+            return capacity;
+        }
 
 public:
-	HashTable(Hash hashFunction) : hash(hashFunction) {
-		currSize = 0;
-		capacity = 101;
-		bucket.assign(capacity, nullptr);
-	}
-	bool insert(K key, V value){
-		//get the hashed index
-		int index = hash(key) % capacity;
+    HashTable(Hash hashFunction = Hash())
+        : currSize(0), capacity(101), deletedCount(0), hash(hashFunction)
+    {
+        bucket.resize(capacity);
+    }
 
-		//check if that element already exists in the bucket
-		if (contains(key)) return false;
+    bool insert(const K& key, const V& value) {
+        if ((float)(currSize + deletedCount) / capacity >= LOAD_FACTOR)
+            rehash();
 
-		//try linear probing if an element already exists in that index
-		while (bucket[index] != nullptr) {
-			index = (index + 1) % capacity;
-		}
+        size_t index = hash(key) % capacity;
+        size_t firstDeleted = capacity;
+        size_t probed = 0;
 
-		//insert val
-		bucket[index]=new HashNode(key, value);
+        while (bucket[index].has_value() && probed < capacity) {
+            if (bucket[index]->state == STATE::OCCUPIED &&
+                bucket[index]->key == key)
+            {
+                bucket[index]->value = value;
+                return true;
+            }
 
-		//check if the size exceeds the load factor
-		if ((float)(++currSize)/capacity >= LOAD_FACTOR) reSize();
+            if (bucket[index]->state == STATE::DELETED &&
+                firstDeleted == capacity)
+            {
+                firstDeleted = index;
+            }
 
-		return true;
-	}
-	bool remove(){}
-	bool contains(){}
-	void clear(){}
-	T getElement(){}
+            index = (index + 1) % capacity;
+            ++probed;
+        }
 
-	//regular getters
-	size_t getSize() { return currSize; }
+        if (firstDeleted != capacity) {
+            index = firstDeleted;
+            --deletedCount;
+        }
+
+        bucket[index] = HashNode(key, value);
+        ++currSize;
+
+        return true;
+    }
+
+    bool remove(const K& key) {
+        size_t index = findIndex(key);
+        if (index == capacity)
+            return false;
+
+        bucket[index]->state = STATE::DELETED;
+        --currSize;
+        ++deletedCount;
+        return true;
+    }
+
+    bool contains(const K& key) const {
+        return findIndex(key) != capacity;
+    }
+
+    void clear() {
+        bucket.assign(capacity, std::nullopt);
+        currSize = 0;
+        deletedCount = 0;
+    }
+
+    std::optional<std::pair<K, V>> getElement(const K& key) const {
+        size_t index = findIndex(key);
+        if (index == capacity)
+            return std::nullopt;
+        return std::make_pair(bucket[index]->key, bucket[index]->value);
+    }
+
+    size_t getSize() const { return currSize; }
+    size_t getCapacity() const { return capacity; }
+    bool isEmpty() const { return currSize == 0; }
 };

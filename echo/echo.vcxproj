@@ -87,6 +87,8 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>Default</LanguageStandard_C>
     </ClCompile>
     <Link>
       <AdditionalDependencies />
@@ -96,6 +98,8 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>Default</LanguageStandard_C>
     </ClCompile>
     <Link>
       <AdditionalDependencies />
@@ -115,8 +119,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Account.h" />
+    <ClInclude Include="AppController.h" />
     <ClInclude Include="Artist.h" />
+    <ClInclude Include="EchoService.h" />
     <ClInclude Include="FileManger.h" />
+    <ClInclude Include="HashTable.h" />
     <ClInclude Include="Library.h" />
     <ClInclude Include="Playlist.h" />
     <ClInclude Include="Song.h" />
