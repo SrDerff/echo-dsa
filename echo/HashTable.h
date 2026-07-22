@@ -110,6 +110,11 @@ public:
         return true;
     }
 
+    V& getElement(const K& key) {
+        size_t index = findIndex(key);
+        return (bucket[index])->value;
+    }
+
     bool remove(const K& key) {
         size_t index = findIndex(key);
         if (index == capacity)
