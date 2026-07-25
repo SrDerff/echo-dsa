@@ -4,6 +4,7 @@
 
 class Playlist {
 private:
+	int idPlaylist;
 	std::string name;
 	LinkedList<Song>allSongs;
 	int visibleRows;
@@ -18,6 +19,8 @@ public:
 
 	}
 
+	std::string getName() { return name; }
+	int getIdPlaylist() { return idPlaylist; }
 	int getVisibleRows() { return visibleRows; }
 	int getTopRowIndex() { return topRowIndex; }
 	int getCurrentRowIndex() { return currentRowIndex; }
@@ -36,4 +39,5 @@ public:
 	}
 
 	size_t getSize() { return allSongs.getSize(); }
+
 };

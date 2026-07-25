@@ -36,5 +36,25 @@ public:
 	std::string getPasswordHash() { return passwordHash; }
 	bool isVip() { return vip; }
 
-	bool addPlaylist(){}
+	int getIndexPlaylistByName(std::string name) {
+		int index = 0;
+		for (Playlist& pl : playlists) {
+			if (pl.getName() == name) return index;
+			index++;
+		}
+		return -1;
+	}
+
+	bool addPlaylist(std::string name){
+		if (getIndexPlaylistByName(name) != -1) return false;
+		playlists.push_back(Playlist(name));
+		return true;
+	}
+
+	bool removePlaylist(std::string name) {
+		int index = getIndexPlaylistByName(name);
+		if (index == -1) return false;
+		playlists.erase(playlists.begin() + index);
+		return true;
+	}
 };

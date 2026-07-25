@@ -8,8 +8,6 @@ using json = nlohmann::json;
 const std::string PATH_LIBRARY = ".\\..\\data\\songsList.json";
 
 static class FileManager {
-private:
-
 public:
 	/*TO-DO*/
 	static void loadGeneralData(HashTable<int, Song>& allSongs) {

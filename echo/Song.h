@@ -35,6 +35,7 @@ public:
 		this->sourcePath = sourcePath;
 	}
 	~Song(){}
+	bool operator==(const Song& other) const { return name == other.name; }
 	int getIdSong() { return idSong; }
 	std::string getname() { return name; }
 	std::string getAuthor() { return author; }

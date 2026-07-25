@@ -16,6 +16,17 @@ private:
 	size_t size;
 
 public:
+	class Iterator {
+		friend class LinkedList;
+	private:
+		Node* node;
+		Iterator(Node* n) : node(n) {}
+	public:
+		Iterator& operator++() { node = node->next; return *this; }
+		bool operator!=(const Iterator& other) const { return node != other.node; }
+		T& operator*() const { return node->value; }
+	};
+
 	LinkedList() : head(nullptr), tail(nullptr), size(0) {}
 
 	~LinkedList() { clear(); }
@@ -112,6 +123,9 @@ public:
 		}
 		return false;
 	}
+
+	Iterator begin() { return Iterator(head); }
+	Iterator end() { return Iterator(nullptr); }
 
 	T& front() {
 		return head->value;

@@ -23,4 +23,9 @@ public:
 
 	}
 
+	Song& getSongById(int index) {
+		return library.getSongById(index);
+	}
+
+	
 };

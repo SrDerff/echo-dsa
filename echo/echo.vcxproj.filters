@@ -65,5 +65,8 @@
     <ClInclude Include="json.hpp">
       <Filter>lib</Filter>
     </ClInclude>
+    <ClInclude Include="LinkedList.h">
+      <Filter>templates</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

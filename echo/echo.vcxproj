@@ -128,6 +128,7 @@
     <ClInclude Include="HashTable.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="Library.h" />
+    <ClInclude Include="LinkedList.h" />
     <ClInclude Include="Playlist.h" />
     <ClInclude Include="Song.h" />
   </ItemGroup>
