@@ -25,6 +25,9 @@
     <Filter Include="controllers">
       <UniqueIdentifier>{950d398d-e0ec-478c-bbeb-3a5363bb399c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="lib">
+      <UniqueIdentifier>{daa3be79-cef6-4721-869b-d8c9ca1b6dd7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -41,7 +44,7 @@
     <ClInclude Include="Account.h">
       <Filter>model</Filter>
     </ClInclude>
-    <ClInclude Include="FileManger.h">
+    <ClInclude Include="FileManager.h">
       <Filter>files</Filter>
     </ClInclude>
     <ClInclude Include="Playlist.h">
@@ -57,6 +60,12 @@
       <Filter>services</Filter>
     </ClInclude>
     <ClInclude Include="HashTable.h">
+      <Filter>templates</Filter>
+    </ClInclude>
+    <ClInclude Include="json.hpp">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkedList.h">
       <Filter>templates</Filter>
     </ClInclude>
   </ItemGroup>

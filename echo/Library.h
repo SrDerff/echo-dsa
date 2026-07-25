@@ -16,8 +16,12 @@ public:
 
 	HashTable<int, Song>& getAllSongs() { return allSongs; }
 	int getVisibleRows() { return visibleRows; }
-	int topRowIndex() { return topRowIndex; }
-	int currentRowIndex() { return currentRowIndex; }
+	int getTopRowIndex() { return topRowIndex; }
+	int getCurrentRowIndex() { return currentRowIndex; }
+
+	void setVisibleRows(int row) { visibleRows = row; }
+	void setTopRowIndex(int row) { topRowIndex = row; }
+	void setCurrentRowIndex(int row) { currentRowIndex = row; }
 
 	Song& getSongById(int idSong) {
 		return allSongs.getElement(idSong);
