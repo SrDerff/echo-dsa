@@ -19,6 +19,10 @@ public:
 	int getTopRowIndex() { return topRowIndex; }
 	int getCurrentRowIndex() { return currentRowIndex; }
 
+	void setVisibleRows(int row) { visibleRows = row; }
+	void setTopRowIndex(int row) { topRowIndex = row; }
+	void setCurrentRowIndex(int row) { currentRowIndex = row; }
+
 	Song& getSongById(int idSong) {
 		return allSongs.getElement(idSong);
 	}
