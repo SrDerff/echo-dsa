@@ -22,8 +22,8 @@ public:
 		long long playCount,
 		long long likesCount,
 		long long dislikesCount,
-		std::string sourcePath,
-		std::string genre
+		std::string genre,
+		std::string sourcePath
 	) {
 		this->idSong = idSong;
 		this->name = author;
@@ -31,13 +31,11 @@ public:
 		this->playCount = playCount;
 		this->likesCount = likesCount;
 		this->dislikesCount = dislikesCount;
-		this->sourcePath = sourcePath;
 		this->genre = genre;
+		this->sourcePath = sourcePath;
 	}
 	~Song(){}
-	int getIdSong() {
-	
-	}
+	int getIdSong() { return idSong; }
 	std::string getname() { return name; }
 	std::string getAuthor() { return author; }
 	float getLength() { return length; }
