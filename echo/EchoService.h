@@ -1,5 +1,5 @@
 #pragma once
-#include "FileManger.h"
+#include "FileManager.h"
 #include "Library.h"
 #include "Account.h"
 class EchoService {
@@ -7,18 +7,17 @@ private:
 	/*
 	TO-DO
 	*/
-	FileManager fileManager;
 	Library library;
 	Account currAccount;
 public:
 	EchoService() {
-
+		loadGeneralService();
 	}
 	~EchoService() {
 
 	}
 	void loadGeneralService() {
-
+		FileManager::loadGeneralData(library.getAllSongs());
 	}
 	void loadAccountService() {
 

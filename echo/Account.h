@@ -13,6 +13,18 @@ private:
 	playlists,likes,dislikes,etc
 	*/
 public:
+	Account() {
+		idAccount = -1;
+		username = "null";
+		passwordHash = "null";
+		vip = false;
+	}
+	Account(int _id, string _user, string _password, bool _vip) {
+		idAccount = _id;
+		username = _user;
+		passwordHash = _password;
+		vip = _vip;
+	}
 	int getIdAccount() { return idAccount; }
 	std::string getUsername() { return username; }
 	std::string getPasswordHash() { return passwordHash; }

@@ -16,8 +16,8 @@ public:
 
 	HashTable<int, Song>& getAllSongs() { return allSongs; }
 	int getVisibleRows() { return visibleRows; }
-	int topRowIndex() { return topRowIndex; }
-	int currentRowIndex() { return currentRowIndex; }
+	int getTopRowIndex() { return topRowIndex; }
+	int getCurrentRowIndex() { return currentRowIndex; }
 
 	Song& getSongById(int idSong) {
 		return allSongs.getElement(idSong);

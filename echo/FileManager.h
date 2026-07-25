@@ -5,17 +5,18 @@
 #include "Library.h"
 
 using json = nlohmann::json;
+const std::string PATH_LIBRARY = ".\\..\\data\\songsList.json";
 
 static class FileManager {
 private:
-	const std::string PATH_LIBRARY = ".\\..\\data\\songsList.json";
+
 public:
 	/*TO-DO*/
-	void loadGeneralData(HashTable<int, Song>&allSongs) {
+	static void loadGeneralData(HashTable<int, Song>& allSongs) {
 		loadLibrary(allSongs);
 	}
 
-	void loadLibrary(HashTable<int, Song>& allSongs) {
+	static void loadLibrary(HashTable<int, Song>& allSongs) {
 		std::ifstream file(PATH_LIBRARY);
 		json data;
 		file >> data;
