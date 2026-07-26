@@ -57,4 +57,15 @@ public:
 		playlists.erase(playlists.begin() + index);
 		return true;
 	}
+
+	bool addSongToPlaylist(std::string playlistName, int idSong) {
+		long long index = getIndexPlaylistByName(playlistName);
+		if (index == -1) return false;
+		playlists[index].addSong(idSong);
+		return true;
+	}
+
+	bool removeSongFromPlaylist(std::string playlistName, int idSong) {
+
+	}
 };

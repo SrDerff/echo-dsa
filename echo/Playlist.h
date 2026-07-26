@@ -6,7 +6,7 @@ class Playlist {
 private:
 	int idPlaylist;
 	std::string name;
-	LinkedList<Song>allSongs;
+	LinkedList<int>songsIds;
 	int visibleRows;
 	int topRowIndex;
 	int currentRowIndex;
@@ -30,14 +30,14 @@ public:
 	void setTopRowIndex(int row) { topRowIndex = row; }
 	void setCurrentRowIndex(int row) { currentRowIndex = row; }
 
-	void addSong(Song &newSong){
-		allSongs.pushBack(newSong);
+	void addSong(int newSongId){
+		songsIds.pushBack(newSongId);
 	}
 
-	bool removeSong(Song& song) {
-		return allSongs.remove(song);
+	bool removeSong(int songId) {
+		return songsIds.remove(songId);
 	}
 
-	size_t getSize() { return allSongs.getSize(); }
+	size_t getSize() { return songsIds.getSize(); }
 
 };
