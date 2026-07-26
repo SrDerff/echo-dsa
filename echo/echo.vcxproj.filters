@@ -68,5 +68,8 @@
     <ClInclude Include="LinkedList.h">
       <Filter>templates</Filter>
     </ClInclude>
+    <ClInclude Include="Set.h">
+      <Filter>templates</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

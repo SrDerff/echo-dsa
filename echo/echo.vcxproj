@@ -130,6 +130,7 @@
     <ClInclude Include="Library.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="Playlist.h" />
+    <ClInclude Include="Set.h" />
     <ClInclude Include="Song.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

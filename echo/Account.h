@@ -2,6 +2,7 @@
 
 #include <string>
 #include "Playlist.h"
+#include "Set.h"
 #include <vector>
 
 class Account {
@@ -15,7 +16,7 @@ private:
 	playlists,likes,dislikes,etc
 	*/
 	std::vector<Playlist> playlists;
-
+	Set<int>idsLikedSongs;
 public:
 	Account() {
 		idAccount = -1;
@@ -66,6 +67,8 @@ public:
 	}
 
 	bool removeSongFromPlaylist(std::string playlistName, int idSong) {
-
+		long long index = getIndexPlaylistByName(playlistName);
+		if (index == -1) return false;
+		return playlists[index].removeSong(idSong);
 	}
 };
