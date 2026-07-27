@@ -17,6 +17,7 @@ private:
 	*/
 	std::vector<Playlist> playlists;
 	Set<int>idsLikedSongs;
+	Set<int>idsDislikedSongs;
 public:
 	Account() {
 		idAccount = -1;
@@ -71,4 +72,23 @@ public:
 		if (index == -1) return false;
 		return playlists[index].removeSong(idSong);
 	}
+
+	bool likeSong(int idSong) {
+		idsDislikedSongs.remove(idSong);
+		return idsLikedSongs.insert(idSong);
+	}
+
+	bool unlikeSong(int idSong) {
+		return idsLikedSongs.remove(idSong);
+	}
+
+	bool dislikeSong(int idSong) {
+		idsLikedSongs.remove(idSong);
+		return idsDislikedSongs.insert(idSong);
+	}
+
+	bool removeDislikeSong(int idSong) {
+		return idsDislikedSongs.remove(idSong);
+	}
+
 };
