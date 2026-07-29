@@ -1,6 +1,6 @@
 #pragma once
 
-template<typename T>
+template<typename T, typename Comp>
 class BST {
 private:
 	class Node {
@@ -15,16 +15,18 @@ private:
 		}
 	};
 
-	void _add() {
+	Comp comp;
+
+	void _add(T elem) {
 
 	}
-	void _remove() {
+	void _remove(T elem) {
 
 	}
 
 	size_t size;
 public:
-	BST() {
+	BST(Comp cmp) : comp(cmp) {
 
 	}
 	~BST() {
