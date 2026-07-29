@@ -15,7 +15,28 @@ private:
 		}
 	};
 
-	size_t currSize;
-public:
+	void _add() {
 
+	}
+	void _remove() {
+
+	}
+
+	size_t size;
+public:
+	BST() {
+
+	}
+	~BST() {
+
+	}
+
+	void add(){
+	
+	}
+	void remove(){
+		
+	}
+
+	size_t getSize() { return size; }
 };
