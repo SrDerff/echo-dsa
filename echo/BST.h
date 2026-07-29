@@ -17,8 +17,8 @@ private:
 
 	Comp comp;
 
-	void _add(T elem) {
-
+	void _add(Node* node, T elem) {
+		if (comp());
 	}
 	void _remove(T elem) {
 
