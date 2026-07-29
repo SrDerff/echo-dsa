@@ -19,6 +19,7 @@ private:
 
 	void _add(Node* node, T elem) {
 		if (comp());
+		//recurisve
 	}
 	void _remove(T elem) {
 
