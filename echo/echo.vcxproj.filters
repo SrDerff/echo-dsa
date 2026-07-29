@@ -71,5 +71,11 @@
     <ClInclude Include="Set.h">
       <Filter>templates</Filter>
     </ClInclude>
+    <ClInclude Include="LRU.h">
+      <Filter>templates</Filter>
+    </ClInclude>
+    <ClInclude Include="BST.h">
+      <Filter>templates</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

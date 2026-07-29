@@ -123,12 +123,14 @@
     <ClInclude Include="Account.h" />
     <ClInclude Include="AppController.h" />
     <ClInclude Include="Artist.h" />
+    <ClInclude Include="BST.h" />
     <ClInclude Include="EchoService.h" />
     <ClInclude Include="FileManager.h" />
     <ClInclude Include="HashTable.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="Library.h" />
     <ClInclude Include="LinkedList.h" />
+    <ClInclude Include="LRU.h" />
     <ClInclude Include="Playlist.h" />
     <ClInclude Include="Set.h" />
     <ClInclude Include="Song.h" />
