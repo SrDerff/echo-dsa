@@ -41,9 +41,6 @@
     <ClInclude Include="Artist.h">
       <Filter>model</Filter>
     </ClInclude>
-    <ClInclude Include="Account.h">
-      <Filter>model</Filter>
-    </ClInclude>
     <ClInclude Include="FileManager.h">
       <Filter>files</Filter>
     </ClInclude>
@@ -76,6 +73,12 @@
     </ClInclude>
     <ClInclude Include="BST.h">
       <Filter>templates</Filter>
+    </ClInclude>
+    <ClInclude Include="Account.h">
+      <Filter>services</Filter>
+    </ClInclude>
+    <ClInclude Include="Album.h">
+      <Filter>services</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

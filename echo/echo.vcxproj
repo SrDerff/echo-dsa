@@ -121,6 +121,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Account.h" />
+    <ClInclude Include="Album.h" />
     <ClInclude Include="AppController.h" />
     <ClInclude Include="Artist.h" />
     <ClInclude Include="BST.h" />

@@ -2,6 +2,7 @@
 #include "FileManager.h"
 #include "Library.h"
 #include "Account.h"
+#include "Album.h"
 
 class EchoService {
 private:
@@ -9,6 +10,7 @@ private:
 	TO-DO
 	*/
 	Library library;
+	Album album;
 	Account currAccount;
 public:
 	EchoService() {
@@ -28,5 +30,4 @@ public:
 		return library.getSongById(index);
 	}
 
-	
 };
