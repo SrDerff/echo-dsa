@@ -12,7 +12,7 @@ private:
 	int currentRowIndex;
 	int currentSongId;
 public:
-	Playlist(std::string _name) : visibleRows(17), topRowIndex(17), currentRowIndex(1) {
+	Playlist(std::string _name) : idPlaylist(0), visibleRows(17), topRowIndex(17), currentRowIndex(1) {
 		name = _name;
 	}
 	~Playlist() {

@@ -167,7 +167,9 @@ public:
 
             for (const auto& pl : acc["playlists"]) {
                 std::string playlistName = pl["name"];
+                int playlistId = pl.value("id", 0);
                 if (currAccount.addPlaylist(playlistName)) {
+                    currAccount.getPlaylists().back().setIdPlaylist(playlistId);
                     for (const auto& songId : pl["songs"]) {
                         currAccount.addSongToPlaylist(playlistName, songId);
                     }
@@ -222,6 +224,7 @@ private:
 		accJson["playlists"] = json::array();
 		for (Playlist& pl : acc.getPlaylists()) {
 			json plJson;
+			plJson["id"] = pl.getIdPlaylist();
 			plJson["name"] = pl.getName();
 			plJson["songs"] = json::array();
 			for (int songId : pl.getSongsIds()) {
