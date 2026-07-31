@@ -1,0 +1,16 @@
+[
+    {
+        "id": 1,
+        "user": "demo",
+        "password": "hash123",
+        "vip": false,
+        "playlists": [
+            {
+                "name": "Favoritas",
+                "songs": [1000, 1001]
+            }
+        ],
+        "likedSongs": [1000],
+        "dislikedSongs": []
+    }
+]

@@ -1,23 +1,46 @@
 [
     {
-        "id":1000,
-        "name":"",
-        "author":"",
-        "length":2.25,
-        "play_count":5,
-        "likes_count":10,
-        "dislikes_count":5,
-        "genre":"",
-        "path":""
+        "author": "Eminem",
+        "dislikes_count": 80,
+        "genre": "Hip-Hop",
+        "id": 1003,
+        "length": 5.260000228881836,
+        "likes_count": 1750,
+        "name": "Lose Yourself",
+        "path": "audio/lose_yourself.mp3",
+        "play_count": 2800
     },
     {
-        
+        "author": "Queen",
+        "dislikes_count": 60,
+        "genre": "Rock",
+        "id": 1002,
+        "length": 5.550000190734863,
+        "likes_count": 4300,
+        "name": "Bohemian Rhapsody",
+        "path": "audio/bohemian_rhapsody.mp3",
+        "play_count": 5100
     },
     {
-
+        "author": "The Weeknd",
+        "dislikes_count": 95,
+        "genre": "Pop",
+        "id": 1001,
+        "length": 3.200000047683716,
+        "likes_count": 2100,
+        "name": "Blinding Lights",
+        "path": "audio/blinding_lights.mp3",
+        "play_count": 3400
     },
     {
-
+        "author": "Bad Bunny",
+        "dislikes_count": 40,
+        "genre": "Reggaeton",
+        "id": 1000,
+        "length": 4.179999828338623,
+        "likes_count": 850,
+        "name": "Ojitos Lindos",
+        "path": "audio/ojitos_lindos.mp3",
+        "play_count": 1200
     }
-
 ]

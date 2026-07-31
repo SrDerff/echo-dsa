@@ -26,7 +26,8 @@ public:
 		std::string sourcePath
 	) {
 		this->idSong = idSong;
-		this->name = author;
+		this->name = name;
+		this->author = author;
 		this->length = length;
 		this->playCount = playCount;
 		this->likesCount = likesCount;
@@ -37,7 +38,7 @@ public:
 	~Song(){}
 	bool operator==(const Song& other) const { return name == other.name; }
 	int getIdSong() { return idSong; }
-	std::string getname() { return name; }
+	std::string getName() { return name; }
 	std::string getAuthor() { return author; }
 	float getLength() { return length; }
 	long long getPlayCount() { return playCount; }

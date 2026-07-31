@@ -67,6 +67,48 @@ private:
         }
 
 public:
+    class Iterator {
+        friend class HashTable;
+    private:
+        std::vector<std::optional<HashNode>>* bucketPtr;
+        size_t capacity;
+        size_t index;
+
+        Iterator(std::vector<std::optional<HashNode>>* b, size_t cap, size_t idx)
+            : bucketPtr(b), capacity(cap), index(idx)
+        {
+            advanceToOccupied();
+        }
+
+        void advanceToOccupied() {
+            while (index < capacity) {
+                if ((*bucketPtr)[index].has_value() &&
+                    (*bucketPtr)[index]->state == STATE::OCCUPIED)
+                    return;
+                ++index;
+            }
+        }
+
+    public:
+        Iterator& operator++() {
+            ++index;
+            advanceToOccupied();
+            return *this;
+        }
+
+        bool operator!=(const Iterator& other) const {
+            return index != other.index;
+        }
+
+        const K& getKey() const {
+            return (*bucketPtr)[index]->key;
+        }
+
+        V& getValue() const {
+            return (*bucketPtr)[index]->value;
+        }
+    };
+
     HashTable(Hash hashFunction = Hash())
         : currSize(0), capacity(101), deletedCount(0), hash(hashFunction)
     {
@@ -146,4 +188,12 @@ public:
     size_t getSize() const { return currSize; }
     size_t getCapacity() const { return capacity; }
     bool isEmpty() const { return currSize == 0; }
+
+    Iterator begin() {
+        return Iterator(&bucket, capacity, 0);
+    }
+
+    Iterator end() {
+        return Iterator(&bucket, capacity, capacity);
+    }
 };

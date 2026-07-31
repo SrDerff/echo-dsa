@@ -26,6 +26,10 @@ public:
 	int getCurrentRowIndex() { return currentRowIndex; }
 	int getCurrentSongId() { return currentSongId; }
 
+	LinkedList<int>& getSongsIds() { return songsIds; }
+
+	void setIdPlaylist(int _id) { idPlaylist = _id; }
+
 	void setVisibleRows(int row) { visibleRows = row; }
 	void setTopRowIndex(int row) { topRowIndex = row; }
 	void setCurrentRowIndex(int row) { currentRowIndex = row; }

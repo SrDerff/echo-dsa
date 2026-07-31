@@ -10,7 +10,7 @@ private:
 	TO-DO
 	*/
 	Library library;
-	Album album;
+	std::vector<Album>albums;
 	Account currAccount;
 public:
 	EchoService() {
@@ -19,9 +19,12 @@ public:
 	~EchoService() {
 
 	}
+
 	void loadGeneralService() {
-		FileManager::loadGeneralData(library.getAllSongs());
+		FileManager::loadGeneralData(library.getAllSongs(), albums);
+
 	}
+
 	void loadAccountService() {
 
 	}

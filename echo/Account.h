@@ -26,7 +26,7 @@ public:
 		vip = false;
 	}
 	
-	Account(int _id, string _user, string _password, bool _vip) {
+	Account(int _id, std::string _user, std::string _password, bool _vip) {
 		idAccount = _id;
 		username = _user;
 		passwordHash = _password;
@@ -37,6 +37,15 @@ public:
 	std::string getUsername() { return username; }
 	std::string getPasswordHash() { return passwordHash; }
 	bool isVip() { return vip; }
+
+	void setIdAccount(int _id) { idAccount = _id; }
+	void setUsername(std::string _user) { username = _user; }
+	void setPasswordHash(std::string _password) { passwordHash = _password; }
+	void setVip(bool _vip) { vip = _vip; }
+
+	std::vector<Playlist>& getPlaylists() { return playlists; }
+	Set<int>& getLikedSongs() { return idsLikedSongs; }
+	Set<int>& getDislikedSongs() { return idsDislikedSongs; }
 
 	int getIndexPlaylistByName(std::string name) {
 		int index = 0;

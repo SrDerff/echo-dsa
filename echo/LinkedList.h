@@ -29,8 +29,49 @@ public:
 
 	LinkedList() : head(nullptr), tail(nullptr), size(0) {}
 
+	LinkedList(const LinkedList& other) : head(nullptr), tail(nullptr), size(0) {
+		copyFrom(other);
+	}
+
+	LinkedList(LinkedList&& other) noexcept
+		: head(other.head), tail(other.tail), size(other.size)
+	{
+		other.head = other.tail = nullptr;
+		other.size = 0;
+	}
+
+	LinkedList& operator=(const LinkedList& other) {
+		if (this != &other) {
+			clear();
+			copyFrom(other);
+		}
+		return *this;
+	}
+
+	LinkedList& operator=(LinkedList&& other) noexcept {
+		if (this != &other) {
+			clear();
+			head = other.head;
+			tail = other.tail;
+			size = other.size;
+			other.head = other.tail = nullptr;
+			other.size = 0;
+		}
+		return *this;
+	}
+
 	~LinkedList() { clear(); }
 
+private:
+	void copyFrom(const LinkedList& other) {
+		Node* current = other.head;
+		while (current) {
+			pushBack(current->value);
+			current = current->next;
+		}
+	}
+
+public:
 	void pushFront(const T& value) {
 		Node* newNode = new Node(value);
 		if (isEmpty()) {
