@@ -99,5 +99,20 @@ public:
 	bool removeDislikeSong(int idSong) {
 		return idsDislikedSongs.remove(idSong);
 	}
+	
+	std::vector<int> getLikedSongsOrdered() {
+		std::vector<int> order;
+		for (auto it = idsLikedSongs.begin(); it != idsLikedSongs.end(); ++it) {
+			order.push_back(*it);
+		}
+		return order;
+	}
 
+	std::vector<int> getDislikedSongsOrdered() {
+		std::vector<int> order;
+		for (auto it = idsDislikedSongs.begin(); it != idsDislikedSongs.end(); ++it) {
+			order.push_back(*it);
+		}
+		return order;
+	}
 };

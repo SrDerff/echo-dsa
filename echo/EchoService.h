@@ -3,6 +3,7 @@
 #include "Library.h"
 #include "Account.h"
 #include "Album.h"
+#include "SoundAPI.h"
 
 class EchoService {
 private:
@@ -12,6 +13,7 @@ private:
 	Library library;
 	std::vector<Album>albums;
 	Account currAccount;
+
 public:
 	EchoService() {
 		loadGeneralService();
@@ -41,6 +43,67 @@ public:
 		return library.getSongById(index);
 	}
 
+	void playSong() {
+		
+	}
 
+	//LIKES
+
+	bool likeSong() {
+
+	}
+
+	bool dislikeSong() {
+	
+	}
+
+	bool removeLikeSong() {
+
+	}
+
+	bool removeDislikeSong() {
+
+	}
+
+	//PLAYLISTS
+
+	bool addSongToPlaylist() {
+
+	}
+
+	bool removeSongFromPlaylist() {
+
+	}
+
+	bool createPlaylist() {
+
+	}
+
+	bool deletePlaylist() {
+
+	}
+
+	void openPlaylist() {
+
+	}
+
+	void closePlaylist() {
+	
+	}
+
+	//ALBUMS
+
+	void openAlbum() {
+
+	}
+
+	void closeAlbum() {
+	
+	}
+
+	//RECOMMENDATIONS
+
+
+	//SEARCH
 
 };

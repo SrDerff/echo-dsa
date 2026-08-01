@@ -5,6 +5,7 @@
 class Library {
 private:
 	HashTable<int, Song>allSongs;
+	std::vector<int>songOrder;
 	int visibleRows;
 	int topRowIndex;
 	int currentRowIndex;
@@ -30,4 +31,13 @@ public:
 	int getCurrentSongId() {
 		return currentSongId;
 	}
+
+	void buildIndex() {
+		songOrder.clear();
+		for (auto it = allSongs.begin(); it != allSongs.end(); ++it) {
+			songOrder.push_back(it.getKey());
+		}
+	}
+	int getCount() const { return (int)songOrder.size(); }
+	int getIdAtRow(int row) const { return songOrder[row - 1]; }
 };
