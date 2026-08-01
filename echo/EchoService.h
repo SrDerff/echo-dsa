@@ -22,15 +22,25 @@ public:
 
 	void loadGeneralService() {
 		FileManager::loadGeneralData(library.getAllSongs(), albums);
-
 	}
 
 	void loadAccountService() {
+		FileManager::loadPersonalData(currAccount);
+	}
 
+	void saveGeneralService() {
+		FileManager::saveGeneralData(library.getAllSongs(), albums);
+	}
+
+	void unloadAccountService() {
+		FileManager::savePersonalData(currAccount);
+		currAccount = Account();
 	}
 
 	Song& getSongById(int index) {
 		return library.getSongById(index);
 	}
+
+
 
 };

@@ -80,5 +80,8 @@
     <ClInclude Include="Album.h">
       <Filter>services</Filter>
     </ClInclude>
+    <ClInclude Include="SoundAPI.h">
+      <Filter>resources</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
