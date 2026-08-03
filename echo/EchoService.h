@@ -49,41 +49,41 @@ public:
 
 	//LIKES
 
-	bool likeSong() {
-
+	bool likeSong(int idSong) {
+		return currAccount.likeSong(idSong);
 	}
 
-	bool dislikeSong() {
-	
+	bool dislikeSong(int idSong) {
+		return currAccount.dislikeSong(idSong);	
 	}
 
-	bool removeLikeSong() {
-
+	bool removeLikeSong(int idSong) {
+		return currAccount.unlikeSong(idSong);
 	}
 
-	bool removeDislikeSong() {
-
+	bool removeDislikeSong(int idSong) {
+		return currAccount.removeDislikeSong(idSong);
 	}
 
 	//PLAYLISTS
 
-	bool addSongToPlaylist() {
-
+	bool addSongToPlaylist(std::string plName, int idSong) {
+		return currAccount.addSongToPlaylist(plName, idSong);
 	}
 
-	bool removeSongFromPlaylist() {
-
+	bool removeSongFromPlaylist(std::string plName, int idSong) {
+		return currAccount.removeSongFromPlaylist(plName, idSong);
 	}
 
-	bool createPlaylist() {
-
+	bool createPlaylist(std::string plName) {
+		return currAccount.addPlaylist(plName);
 	}
 
-	bool deletePlaylist() {
-
+	bool deletePlaylist(std::string plName) {
+		return currAccount.removePlaylist(plName);
 	}
 
-	void openPlaylist() {
+	void openPlaylist(std::string plName) {
 
 	}
 
@@ -105,5 +105,6 @@ public:
 
 
 	//SEARCH
+
 
 };
