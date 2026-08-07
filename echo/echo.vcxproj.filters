@@ -83,5 +83,8 @@
     <ClInclude Include="SoundAPI.h">
       <Filter>resources</Filter>
     </ClInclude>
+    <ClInclude Include="Graph.h">
+      <Filter>templates</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
