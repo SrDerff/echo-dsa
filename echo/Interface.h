@@ -5,9 +5,13 @@
 #include <vector>
 #include <windows.h>
 
+// Tabs del HUD superior (todos visibles, el activo se resalta).
 enum class Tab { LIBRARY, PLAYLISTS, LIKES, DISLIKES, RECOMMENDED };
+
+// Estado del reproductor reflejado en la barra inferior.
 enum class PlayerState { STOPPED, PLAYING, PAUSED };
 
+// Una fila del panel central: cancion o playlist segun isPlaylist.
 struct RowData {
 	std::string title;
 	std::string artist;
@@ -19,6 +23,7 @@ struct RowData {
 	bool isPlaying;
 };
 
+// Datos de la cancion activa + estado + progreso del reproductor.
 struct PlayerData {
 	std::string songName;
 	std::string artist;
@@ -27,6 +32,7 @@ struct PlayerData {
 	float position;
 };
 
+// Contrato de datos que la UI imprime en cada frame (todo llega junto).
 struct ViewData {
 	Tab activeTab;
 	std::string username;
@@ -41,6 +47,7 @@ private:
 	static const int PANEL_WIDTH = 90;
 	static const int VISIBLE_ROWS = 17;
 
+	// Codigos de color / formato ANSI.
 	inline static const std::string RESET = "\x1b[0m";
 	inline static const std::string BOLD = "\x1b[1m";
 	inline static const std::string DIM = "\x1b[2m";
@@ -50,6 +57,7 @@ private:
 	inline static const std::string RED = "\x1b[31m";
 	inline static const std::string REVERSE = "\x1b[7m";
 
+	// Simbolos UTF-8: play, nota musical, corazon, anterior/siguiente, pausa, bloque de barra, sombra de barra, ellipsis.
 	inline static const std::string PLAY_SYM = "\xE2\x96\xB6";
 	inline static const std::string NOTE_SYM = "\xE2\x99\xAA";
 	inline static const std::string HEART_SYM = "\xE2\x99\xA5";
@@ -60,6 +68,7 @@ private:
 	inline static const std::string SHADE_SYM = "\xE2\x96\x91";
 	inline static const std::string ELLIPSIS = "\xE2\x80\xA6";
 
+	// Nombre legible de cada tab.
 	static std::string tabName(Tab t) {
 		switch (t) {
 		case Tab::LIBRARY: return "LIBRARY";
@@ -70,18 +79,21 @@ private:
 		}
 		return "?";
 	}
-
+	
+	// Rellena o recorta a ancho fijo (por bytes).
 	static std::string pad(const std::string& s, size_t width) {
 		if (s.size() >= width) return s.substr(0, width);
 		return s + std::string(width - s.size(), ' ');
 	}
 
+	// Corta con "..." si excede el ancho.
 	static std::string truncate(const std::string& s, size_t width) {
 		if (s.size() <= width) return s;
 		if (width <= 1) return s.substr(0, width);
 		return s.substr(0, width - 1) + ELLIPSIS;
 	}
 
+	// Segundos -> formato m:ss.
 	static std::string fmtTime(float seconds) {
 		int total = (int)seconds;
 		int m = total / 60;
@@ -90,6 +102,7 @@ private:
 		return std::to_string(m) + ":" + ss;
 	}
 
+		// HUD superior: logo + usuario + tabs fijos, el activo resaltado.
 	static void drawTabs(const ViewData& data) {
 		std::cout << " " << GREEN << PLAY_SYM << " Echo" << RESET
 			<< std::string(40, ' ')
@@ -109,6 +122,7 @@ private:
 		std::cout << "\n";
 	}
 
+	// Compone el texto ASCII de una fila (cancion o playlist).
 	static std::string buildRowText(const RowData& rd, int row) {
 		std::string num = pad(std::to_string(row), 3);
 
@@ -127,6 +141,7 @@ private:
 		return " " + num + ". " + title + " " + artist + " " + genre + " " + likes + likeMark + playMark;
 	}
 
+	// Pinta una fila; resalta en inverso la seleccionada.
 	static void drawRow(const ViewData& data, int row) {
 		std::string line = buildRowText(data.rows[row - 1], row);
 		if (row == data.selectedIndex) {
@@ -137,6 +152,7 @@ private:
 		}
 	}
 
+	// Lista central con scroll (desde topRowIndex, max VISIBLE_ROWS filas).
 	static void drawPanel(const ViewData& data) {
 		std::cout << " " << CYAN << BOLD << tabName(data.activeTab) << RESET
 			<< DIM << "   (↑/↓ mover | Enter abrir/reproducir | Esc volver)" << RESET << "\n";
@@ -156,6 +172,7 @@ private:
 		std::cout << " " << std::string(PANEL_WIDTH, '-') << "\n";
 	}
 
+	// Barra █/░ segun proporcion posicion/duracion (ancho 20).
 	static std::string buildProgressBar(float pos, float length) {
 		int filled = 0;
 		if (length > 0) {
@@ -168,6 +185,7 @@ private:
 		return bar;
 	}
 
+	// Barra fija inferior: cancion actual + controles + estado + progreso.
 	static void drawPlayer(const PlayerData& p) {
 		std::cout << " " << std::string(PANEL_WIDTH, '=') << "\n";
 
@@ -199,6 +217,7 @@ private:
 	}
 
 public:
+	// Configura la consola (UTF-8 + ANSI) y oculta el cursor. Se llama una vez al inicio.
 	static void init() {
 		SetConsoleOutputCP(CP_UTF8);
 		HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -209,6 +228,7 @@ public:
 		std::cout << "\x1b[?25l";
 	}
 
+	// Limpia la pantalla y dibuja las 3 zonas (tabs, panel, reproductor).
 	void render(const ViewData& data) {
 		std::cout << "\x1b[2J\x1b[H";
 		drawTabs(data);
