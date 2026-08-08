@@ -129,6 +129,7 @@
     <ClInclude Include="FileManager.h" />
     <ClInclude Include="Graph.h" />
     <ClInclude Include="HashTable.h" />
+    <ClInclude Include="Interface.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="Library.h" />
     <ClInclude Include="LinkedList.h" />

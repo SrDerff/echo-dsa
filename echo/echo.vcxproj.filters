@@ -86,5 +86,8 @@
     <ClInclude Include="Graph.h">
       <Filter>templates</Filter>
     </ClInclude>
+    <ClInclude Include="Interface.h">
+      <Filter>services</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

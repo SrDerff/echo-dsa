@@ -10,7 +10,7 @@ enum class Tab { LIBRARY, PLAYLISTS, LIKES, DISLIKES, RECOMMENDED };
 
 // Estado del reproductor reflejado en la barra inferior.
 enum class PlayerState { STOPPED, PLAYING, PAUSED };
-
+	
 // Una fila del panel central: cancion o playlist segun isPlaylist.
 struct RowData {
 	std::string title;
@@ -44,7 +44,7 @@ struct ViewData {
 
 class Interface {
 private:
-	static const int PANEL_WIDTH = 90;
+	static const int PANEL_WIDTH = 120;
 	static const int VISIBLE_ROWS = 17;
 
 	// Codigos de color / formato ANSI.
