@@ -21,9 +21,9 @@ public:
 	EchoService() {
 		loadGeneralService();
 		library.buildIndex();
-		buildViewData();
 		activeTab = Tab::LIBRARY;
 		playerState = PlayerState::PAUSED;
+		buildViewData();
 	}
 	~EchoService() {
 
@@ -97,6 +97,8 @@ public:
 		_playerData.state = playerState;
 		_playerData.length = 180.0f;
 		_playerData.position = 45.0f;
+
+		viewData.player = _playerData;
 	}
 
 	const ViewData& getViewData() {
