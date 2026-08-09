@@ -1,6 +1,8 @@
 #pragma once
+#include <iostream>
 #include <vector>
 #include <stdexcept>
+#include <queue>
 #include "HashTable.h"
 #include "LinkedList.h"
 
@@ -9,15 +11,29 @@ class Graph {
 public:
 	class Edge {
 	public:
-		size_t destination;
+		size_t to;
 		Weight weight;
 		Edge(size_t _dest, Weight _weight) 
-			: destination(_dest), weight(_weight) {}
+			: to(_dest), weight(_weight) {}
 	};
 private:
 	std::vector<VertexType>vertices;
 	std::vector<std::vector<Edge>> adjacencyList;
 	bool directed;
+
+	void _dfs(size_t index, std::vector<bool>& visited) {
+		if (visited[index])
+			return;
+
+		visited[index] = true;
+
+		//could be replaced by another funcionality
+		std::cout << vertices[index] << " ";
+
+		for (const Edge& edge : adjacencyList[index]) {
+			_dfs(edge.to, visited);
+		}
+	}
 public:
 	Graph(bool dir=false) : directed(dir) {}
 	~Graph() {}
@@ -67,12 +83,51 @@ public:
 			for (const Edge& edge : adjacencyList[i]) {
 				std::cout
 					<< "("
-					<< vertices[edge.destination]
+					<< vertices[edge.to]
 					<< ", "
 					<< edge.weight
 					<< ") ";
 			}
 			std::cout << '\n';
+		}
+	}
+
+	// DFS: Depth First Search
+	// recursive
+	void dfs(size_t index) {
+		if (index >= vertices.size())
+			throw std::out_of_range("invalid index");
+
+		std::vector<bool> visited(vertices.size(), false);
+
+		_dfs(index, visited);
+	}
+
+	// BFS: Breadth First Search
+	// non-recursive
+	void bfs(size_t index) {
+		if (index >= vertices.size())
+			throw std::out_of_range("invalid index");
+
+		std::vector<bool>visited(vertices.size(), false);
+		std::queue<size_t>q;
+
+		q.push(index);
+		visited[index] = true;
+
+		while (!q.empty()) {
+			size_t current = q.front();
+			q.pop();
+
+			//could be replaced by another funcionality
+			std::cout << vertices[current] << " ";
+
+			for (const Edge& edge : adjacencyList[current]) {
+				if (!visited[edge.to]) {
+					visited[edge.to] = true;
+					q.push(edge.to);
+				}
+			}
 		}
 	}
 };
