@@ -3,6 +3,7 @@
 #include <vector>
 #include <stdexcept>
 #include <queue>
+#include <stack>
 #include "HashTable.h"
 #include "LinkedList.h"
 
@@ -103,8 +104,59 @@ public:
 		_dfs(index, visited);
 	}
 
+	// DFS: Depth First Search
+	// iterative
+	void dfsIterativeRight(size_t index) {
+		if (index >= vertices.size())
+			throw std::out_of_range("invalid index");
+
+		std::vector<bool> visited(vertices.size(), false);
+		std::stack<size_t> s;
+
+		s.push(index);
+		visited[index] = true;
+
+		while (!s.empty()) {
+			size_t current = s.top();
+			s.pop();
+
+			//could be replaced by another funcionality
+			std::cout << vertices[current] << " ";
+
+			for (const Edge& edge : adjacencyList[current]) {
+				if (!visited[edge.to]) {
+					visited[edge.to] = true;
+					s.push(edge.to);
+				}
+			}
+		}
+	}
+
+	// DFS : Depth First Search
+	// iterative
+	void dfsIterativeLeft(size_t index) {
+		if (index >= vertices.size())
+			throw std::out_of_range("invalid index");
+		std::vector<bool> visited(vertices.size(), false);
+		std::stack<size_t> s;
+		s.push(index);
+		visited[index] = true;
+		while (!s.empty()) {
+			size_t current = s.top();
+			s.pop();
+			//could be replaced by another funcionality
+			std::cout << vertices[current] << " ";
+			for (auto it = adjacencyList[current].rbegin(); it != adjacencyList[current].rend(); ++it) {
+				if (!visited[it->to]) {
+					visited[it->to] = true;
+					s.push(it->to);
+				}
+			}
+		}
+	}
+
 	// BFS: Breadth First Search
-	// non-recursive
+	// iterative
 	void bfs(size_t index) {
 		if (index >= vertices.size())
 			throw std::out_of_range("invalid index");
