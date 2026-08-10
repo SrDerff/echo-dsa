@@ -1,14 +1,18 @@
 #pragma once
 
+#define NOMINMAX
+
+#include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <windows.h>
 
-// Tabs del HUD superior (todos visibles, el activo se resalta).
-enum class Tab { LIBRARY, PLAYLISTS, LIKES, DISLIKES, RECOMMENDED };
+// Tabs del HUD superior (diseno del modelo de referencia).
+enum class Tab { LIBRARY, PLAYLISTS, LIKES, RECOMMENDED, HISTORIAL, SEARCH };
 
-// Estado del reproductor reflejado en la barra inferior.
+// Estado del reproductor reflejado en la UI.
 enum class PlayerState { STOPPED, PLAYING, PAUSED };
 
 // Una fila del panel central: cancion o playlist segun isPlaylist.
@@ -20,10 +24,11 @@ struct RowData {
 	bool isLiked;
 	bool isPlaylist;
 	long long playlistSize;
+	float duration;      // segundos (columna Duration del modelo)
 	bool isPlaying;
 };
 
-// Datos de la cancion activa + estado + progreso del reproductor.
+// Datos de la cancion activa + estado del reproductor.
 struct PlayerData {
 	std::string songName;
 	std::string artist;
@@ -45,45 +50,83 @@ struct ViewData {
 
 class Interface {
 private:
-	static const int OUTER = 120;          // ancho total de la ventana
+	// ==== paleta RGB 24-bit (modelo de referencia) ====
+	static const int BG_R = 24, BG_G = 27, BG_B = 39;
+	static const int PANEL_R = 62, PANEL_G = 168, PANEL_B = 210;
+	static const int TITLE_R = 66, TITLE_G = 220, TITLE_B = 244;
+	static const int TEXT_R = 213, TEXT_G = 214, TEXT_B = 222;
+	static const int SOFT_R = 232, SOFT_G = 205, SOFT_B = 152;
+	static const int DIM_R = 145, DIM_G = 148, DIM_B = 165;
+	static const int ACCENT_R = 198, ACCENT_G = 120, ACCENT_B = 255;
+	static const int SELECT_R = 49, SELECT_G = 62, SELECT_B = 83;
+	static const int HDR_R = 71, HDR_G = 136, HDR_B = 182;      // cabecera de tabla
+	static const int HUD_R = 170, HUD_G = 176, HUD_B = 204;     // borde del HUD
+	static const int HUDB_R = 169, HUDB_G = 177, HUDB_B = 204;  // "[Esc]: Salir"
+	static const int VOL_R = 245, VOL_G = 166, VOL_B = 84;      // volumen
+	static const int HELP_R = 198, HELP_G = 148, HELP_B = 255;  // teclas de ayuda
+	static const int HELP_T = 220;                              // texto de ayuda
+
+	static const int SCREEN_W = 196;
+	static const int SCREEN_H = 60;
 	static const int VISIBLE_ROWS = 17;
-	static const int BOX_L = 5;            // columna borde izq de la caja
-	static const int BOX_R = 112;           // columna borde der de la caja
-	static const int BOX = 104;             // ancho del contenido de la fila
 
-	inline static const std::string RESET = "\x1b[0m";
-	inline static const std::string BOLD = "\x1b[1m";
-	inline static const std::string DIM = "\x1b[2m";
-	inline static const std::string CYAN = "\x1b[36m";
-	inline static const std::string GREEN = "\x1b[32m";
-	inline static const std::string YELLOW = "\x1b[33m";
-	inline static const std::string RED = "\x1b[31m";
-	inline static const std::string MAGENTA = "\x1b[95m";
-	inline static const std::string BRIGHT_GREEN = "\x1b[92m";
-	inline static const std::string REVERSE = "\x1b[7m";
-	inline static const std::string FRAME = "\x1b[90m";
+	// ==== glifos UTF-8 ====
+	inline static const std::string G_TL = "\xE2\x94\x8C";      // E2 94 8C
+	inline static const std::string G_TR = "\xE2\x94\x90";      // E2 94 90
+	inline static const std::string G_BL = "\xE2\x94\x94";      // E2 94 94
+	inline static const std::string G_BR = "\xE2\x94\x98";      // E2 94 98
+	inline static const std::string G_H = "\xE2\x94\x80";       // E2 94 80
+	inline static const std::string G_V = "\xE2\x94\x82";       // E2 94 82
+	inline static const std::string G_BLOCK = "\xE2\x96\x88";   // E2 96 88
 
-	inline static const std::string PLAY_SYM = "\xE2\x96\xB6";
-	inline static const std::string NOTE_SYM = "\xE2\x99\xAA";
-	inline static const std::string HEART_SYM = "\xE2\x99\xA5";
-	inline static const std::string PREV_SYM = "\xE2\x8F\xAE";
-	inline static const std::string NEXT_SYM = "\xE2\x8F\xAD";
-	inline static const std::string PAUSE_SYM = "\xE2\x8F\xB8";
-	inline static const std::string BLOCK_SYM = "\xE2\x96\x88";
-	inline static const std::string SHADE_SYM = "\xE2\x96\x91";
-	inline static const std::string ELLIPSIS = "\xE2\x80\xA6";
+	inline static bool initialized = false;
+	inline static int bufW = SCREEN_W;
+	inline static int bufH = SCREEN_H;
 
-	inline static const std::string C_HD = "\xE2\x94\x80";
-	inline static const std::string C_VD = "\xE2\x94\x82";
-	inline static const std::string C_TL = "\xE2\x94\x8C";
-	inline static const std::string C_TR = "\xE2\x94\x90";
-	inline static const std::string C_BL = "\xE2\x94\x94";
-	inline static const std::string C_BR = "\xE2\x94\x98";
-	inline static const std::string C_LF = "\xE2\x94\x9C";
-	inline static const std::string C_RT = "\xE2\x94\xA4";
+	// ==== primitivas de dibujo ====
+	static void setPos(int x, int y) {
+		x = (std::max)(0, (std::min)(x, bufW - 1));
+		y = (std::max)(0, (std::min)(y, bufH - 1));
+		try { System::Console::SetCursorPosition(x, y); } catch (...) {}
+	}
+
+	static void paint(int x, int y, const std::string& s, int fr, int fg, int fb, int br, int bg, int bb) {
+		setPos(x, y);
+		std::cout << "\x1b[38;2;" << fr << ";" << fg << ";" << fb
+			<< ";48;2;" << br << ";" << bg << ";" << bb << "m"
+			<< s << "\x1b[0m";
+	}
+
+	static void hLine(int x, int y, int len, const std::string& glyph, int fr, int fg, int fb, int br, int bg, int bb) {
+		for (int i = 0; i < len; i++) paint(x + i, y, glyph, fr, fg, fb, br, bg, bb);
+	}
+
+	static void vLine(int x, int y, int len, const std::string& glyph, int fr, int fg, int fb, int br, int bg, int bb) {
+		for (int i = 0; i < len; i++) paint(x, y + i, glyph, fr, fg, fb, br, bg, bb);
+	}
+
+	static void fillRect(int x, int y, int w, int h, char ch, int fr, int fg, int fb, int br, int bg, int bb) {
+		std::string row(w, ch);
+		for (int i = 0; i < h; i++) paint(x, y + i, row, fr, fg, fb, br, bg, bb);
+	}
+
+	static void drawBox(int x, int y, int w, int h, int fr, int fg, int fb) {
+		hLine(x + 1, y, w - 2, G_H, fr, fg, fb, BG_R, BG_G, BG_B);
+		hLine(x + 1, y + h - 1, w - 2, G_H, fr, fg, fb, BG_R, BG_G, BG_B);
+		vLine(x, y + 1, h - 2, G_V, fr, fg, fb, BG_R, BG_G, BG_B);
+		vLine(x + w - 1, y + 1, h - 2, G_V, fr, fg, fb, BG_R, BG_G, BG_B);
+		paint(x, y, G_TL, fr, fg, fb, BG_R, BG_G, BG_B);
+		paint(x + w - 1, y, G_TR, fr, fg, fb, BG_R, BG_G, BG_B);
+		paint(x, y + h - 1, G_BL, fr, fg, fb, BG_R, BG_G, BG_B);
+		paint(x + w - 1, y + h - 1, G_BR, fr, fg, fb, BG_R, BG_G, BG_B);
+	}
+
+	static void clearAll() {
+		for (int y = 0; y < SCREEN_H; y++)
+			fillRect(0, y, SCREEN_W, 1, ' ', BG_R, BG_G, BG_B, BG_R, BG_G, BG_B);
+	}
 
 	// ==== utilidades de texto ====
-
 	static int visWidth(const std::string& s) {
 		int w = 0;
 		size_t i = 0;
@@ -103,7 +146,6 @@ private:
 		return w;
 	}
 
-	// Recorta texto a un ancho maximo en columnas, agregando "..." si corta.
 	static std::string fit(const std::string& s, int cols) {
 		if (visWidth(s) <= cols) return s;
 		std::string out;
@@ -119,398 +161,361 @@ private:
 			w += gw;
 			i += clen;
 		}
-		return out + ELLIPSIS;
-	}
-
-	// Rellena texto a una anchura fija (en columnas visibles).
-	static std::string padCol(const std::string& s, int cols) {
-		std::string p = fit(s, cols);
-		int w = visWidth(p);
-		if (w < cols) p += std::string(cols - w, ' ');
-		return p;
-	}
-
-	static std::string tabName(Tab t) {
-		switch (t) {
-		case Tab::LIBRARY: return "LIBRARY";
-		case Tab::PLAYLISTS: return "PLAYLISTS";
-		case Tab::LIKES: return "LIKES";
-		case Tab::DISLIKES: return "DISLIKES";
-		case Tab::RECOMMENDED: return "RECOMMEN";
-		}
-		return "?";
+		return out + "\xE2\x80\xA6"; // "..."
 	}
 
 	static std::string fmtTime(float seconds) {
+		if (seconds <= 0) return "--:--";
 		int total = (int)seconds;
 		int m = total / 60;
 		int s = total % 60;
-		return std::to_string(m) + ":" + (s < 10 ? "0" + std::to_string(s) : std::to_string(s));
+		return std::to_string(m) + ":" + (s < 10 ? "0" : "") + std::to_string(s);
 	}
 
-	// ==== composicion por columnas ====
-
-	inline static int gCol = 0;
-
-	// Imprime texto (con optativo estilo ANSI) y suma columnas visibles.
-	static void put(const std::string& style, const std::string& text) {
-		if (!style.empty()) std::cout << style;
-		std::cout << text;
-		if (!style.empty()) std::cout << RESET;
-		gCol += visWidth(text);
-	}
-
-	static void spaces(int n) {
-		if (n > 0) {
-			std::cout << std::string(n, ' ');
-			gCol += n;
-		}
-	}
-
-	// Inicia un renglon con los bordes exteriores ("│ ").
-	static void lineStart() {
-		std::cout << FRAME << C_VD << RESET << " ";
-		gCol = 2;
-	}
-
-	// Rellena hasta el borde derecho del marco y cierra el renglon.
-	static void lineEnd() {
-		while (gCol < OUTER - 1) spaces(1);
-		std::cout << FRAME << C_VD << RESET << "\n";
-		gCol = 0;
-	}
-
-	// Borde superior/inferior completo del marco.
-	static void outerCorner(const std::string& L, const std::string& R) {
-		std::cout << FRAME << L;
-		gCol = 1;
-		while (gCol < OUTER - 1) { std::cout << C_HD; ++gCol; }
-		std::cout << R << RESET << "\n";
-		gCol = 0;
-	}
-
-	// Renglon horizontal de la caja interior (usado para esquinas).
-	static void boxH(const std::string& L, const std::string& R) {
-		lineStart();
-		spaces(3);                       // hasta BOX_L (5)
-		put(FRAME, L);
-		while (gCol < BOX_R) put(FRAME, C_HD);
-		put(FRAME, R);
-		lineEnd();
-	}
-
-	// Renglon de la caja con celdas (estilo, texto de ancho BOX).
-	static void boxRow(const std::vector<std::pair<std::string, std::string>>& cells) {
-		lineStart();
-		spaces(3);                       // BOX_L = 5
-		put(FRAME, C_VD);
-		spaces(1);                       // colon hasta 7
-		int start = gCol;
-		for (auto& c : cells) put(c.first, c.second);
-		while (gCol < start + BOX) spaces(1);
-		spaces(1);                       // hueco antes del borde derecho
-		put(FRAME, C_VD);                // borde derecho col BOX_R-1 == 91
-		lineEnd();
-	}
-
-	// Renglon del marco con texto centrado.
-	static void centeredLine(const std::string& style, const std::string& text) {
-		lineStart();
-		int w = visWidth(text);
-		int p = (OUTER - 2 - w) / 2;
-		if (p > 0) spaces(p);
-		put(style, text);
-		lineEnd();
-	}
-
-	// ==== cabecera ====
-
-	static void drawHeader(const ViewData& data) {
-		lineStart();
-		put(GREEN + BOLD, " " + PLAY_SYM + " ECHO ");
-		int lw = visWidth(" " + PLAY_SYM + " ECHO ");
-		int rw = visWidth("usuario: ") + visWidth(data.username) + visWidth("[Q] salir") + 3;
-		int fill = OUTER - 2 - lw - rw;
-		if (fill < 2) fill = 2;
-		put(FRAME, std::string(fill, '-'));
-		put(CYAN + BOLD, " usuario: " + data.username + " ");
-		put(DIM, "[Q] salir");
-		lineEnd();
-	}
-
-	static void drawTabs(const ViewData& data) {
-		Tab tabs[] = { Tab::LIBRARY, Tab::PLAYLISTS, Tab::LIKES, Tab::DISLIKES, Tab::RECOMMENDED };
-
-		int w = 0;
-		for (int i = 0; i < 5; ++i) {
-			w += visWidth(tabName(tabs[i])) + 2;
-			if (i < 4) w += 5;
-		}
-		int pad = (OUTER - 2 - w) / 2;
-		lineStart();
-		if (pad > 0) spaces(pad);
-
-		for (int i = 0; i < 5; ++i) {
-			if (i > 0) spaces(5);
-			std::string n = tabName(tabs[i]);
-			if (tabs[i] == data.activeTab)
-				put(CYAN + BOLD, "[" + n + "]");
-			else
-				put(DIM, "  " + n + "  ");
-		}
-		lineEnd();
-	}
-
-	// ==== celdas de las filas ====
-
-	// Etiqueta de columna (colIndex 1..4) o el default.
 	static std::string colLabel(const ViewData& d, int index, const std::string& def) {
 		if (index >= 1 && (int)d.columnTitles.size() >= index && !d.columnTitles[index - 1].empty())
 			return d.columnTitles[index - 1];
 		return def;
 	}
 
-	typedef std::vector<std::pair<std::string, std::string>> Cells;
-
-	// Rellena la ultima celda para que la fila ocupe exactamente BOX columnas.
-	static void appendPad(Cells& c) {
-		int used = 0;
-		for (auto& e : c) used += visWidth(e.second);
-		if (used < BOX) c.emplace_back("", std::string(BOX - used, ' '));
-	}
-
-	// Fila de cancion (con estilos) o plana si selected (para resaltar inverso).
-	static Cells songCells(const RowData& rd, int row, bool selected) {
-		Cells c;
-
-		// marca: "▶" seleccionado, "♪" reproduciendose.
-		std::string mark = "  ";
-		std::string markStyle;
-		if (selected) { mark = "▶ "; markStyle = YELLOW + BOLD; }
-		else if (rd.isPlaying) { mark = NOTE_SYM + " "; markStyle = GREEN + BOLD; }
-		c.emplace_back(markStyle, mark);
-
-		c.emplace_back("", " ");
-		c.emplace_back("", padCol(std::to_string(row) + ".", 3));
-		c.emplace_back("", " ");
-		c.emplace_back(BOLD, padCol(fit(rd.title, 24), 24));
-		c.emplace_back("", " ");
-		c.emplace_back(MAGENTA, padCol(fit(rd.artist, 18), 18));
-		c.emplace_back("", " ");
-		c.emplace_back(BRIGHT_GREEN, padCol(fit(rd.genre, 12), 12));
-		c.emplace_back("", "  ");
-		c.emplace_back(RED, padCol(HEART_SYM + " " + std::to_string(rd.likes), 8));
-		c.emplace_back("", "  ");
-		c.emplace_back(RED, rd.isLiked ? HEART_SYM : " ");
-
-		appendPad(c);
-		return c;
-	}
-
-	// Fila de cancion plana (sin estilos) para el resaltado inverso de la seleccion.
-	static Cells songCellsFlat(const RowData& rd, int row) {
-		Cells c;
-		c.emplace_back("", "▶ ");
-		c.emplace_back("", " ");
-		c.emplace_back("", padCol(std::to_string(row) + ".", 3));
-		c.emplace_back("", " ");
-		c.emplace_back("", padCol(fit(rd.title, 24), 24));
-		c.emplace_back("", " ");
-		c.emplace_back("", padCol(fit(rd.artist, 18), 18));
-		c.emplace_back("", " ");
-		c.emplace_back("", padCol(fit(rd.genre, 12), 12));
-		c.emplace_back("", "  ");
-		c.emplace_back("", padCol(HEART_SYM + " " + std::to_string(rd.likes), 8));
-		c.emplace_back("", "  ");
-		c.emplace_back("", " ");
-		appendPad(c);
-		return c;
-	}
-
-	// Fila de playlist.
-	static Cells playlistCells(const RowData& rd, int row, bool selected) {
-		Cells c;
-		std::string mark = selected ? "▶ " : "  ";
-		c.emplace_back(selected ? YELLOW + BOLD : "", mark);
-		c.emplace_back("", " ");
-		c.emplace_back("", padCol(std::to_string(row) + ".", 3));
-		c.emplace_back("", "  ");
-		c.emplace_back(BOLD, padCol(fit(rd.title, 40), 40));
-		c.emplace_back("", "  ");
-		c.emplace_back(CYAN, padCol(std::to_string(rd.playlistSize) + " canciones", 14));
-		appendPad(c);
-		return c;
-	}
-
-	// Cabecera de columnas de la lista.
-	static Cells headerCells(const ViewData& data, bool playlists) {
-		Cells c;
-		if (playlists) {
-			std::string name = colLabel(data, 1, "PLAYLIST");
-			std::string songs = colLabel(data, 2, "SONGS");
-			c.emplace_back("", "  ");
-			c.emplace_back("", " ");
-			c.emplace_back(DIM, padCol("No.", 3));
-			c.emplace_back("", "  ");
-			c.emplace_back(CYAN + BOLD, padCol(fit(name, 40), 40));
-			c.emplace_back("", "  ");
-			c.emplace_back(CYAN + BOLD, padCol(fit(songs, 14), 14));
-			appendPad(c);
-			return c;
+	static const char* emptyMessage(Tab t) {
+		switch (t) {
+		case Tab::LIBRARY: return "No hay canciones cargadas en la biblioteca.";
+		case Tab::PLAYLISTS: return "No hay playlists creadas.";
+		case Tab::LIKES: return "Marca canciones con L para verlas aqui.";
+		case Tab::RECOMMENDED: return "Marca canciones con L para generar recomendaciones.";
+		case Tab::HISTORIAL: return "El historial esta vacio.";
+		default: return "No se encontraron resultados.";
 		}
-		c.emplace_back("", "  ");
-		c.emplace_back("", " ");
-		c.emplace_back(DIM, padCol("No.", 3));
-		c.emplace_back("", " ");
-		c.emplace_back(CYAN + BOLD, padCol(fit(colLabel(data, 1, "TITLE"), 24), 24));
-		c.emplace_back("", " ");
-		c.emplace_back(CYAN + BOLD, padCol(fit(colLabel(data, 2, "ARTIST"), 18), 18));
-		c.emplace_back("", " ");
-		c.emplace_back(CYAN + BOLD, padCol(fit(colLabel(data, 3, "GENRE"), 12), 12));
-		c.emplace_back("", "  ");
-		c.emplace_back(CYAN + BOLD, padCol(fit(colLabel(data, 4, "LIKES"), 8), 8));
-		c.emplace_back("", "  ");
-		appendPad(c);
-		return c;
 	}
 
-	// ==== listas ====
-
-	static void drawListTitle(const ViewData& data) {
-		lineStart();
-		put(CYAN + BOLD, " " + tabName(data.activeTab) + " ");
-		put(DIM, " · " + std::to_string((int)data.rows.size()) + " canciones");
-		lineEnd();
+	static std::string thirdValue(const RowData& rd, Tab t) {
+		switch (t) {
+		case Tab::PLAYLISTS: return std::to_string((std::max)(0LL, rd.playlistSize));
+		case Tab::RECOMMENDED: return std::to_string(rd.likes);
+		default: return fmtTime(rd.duration);
+		}
 	}
 
-	static void drawList(const ViewData& data) {
-		bool playlist = !data.rows.empty() && data.rows[0].isPlaylist;
+	// ==== HUD superior ====
+	static void drawVolumeBar(int x, int y, int level) {
+		std::string bar = "[";
+		for (int i = 0; i < 6; i++) bar += (i < level ? '=' : ' ');
+		bar += "]";
+		paint(x, y, bar, VOL_R, VOL_G, VOL_B, BG_R, BG_G, BG_B);
+	}
 
-		boxH(C_TL, C_TR);            // tapa de la caja
-		boxRow(headerCells(data, playlist));   // etiquetas de columnas
-		boxH(C_LF, C_RT);           // separador
+	static void drawHud(const ViewData& data) {
+		drawBox(2, 1, 196, 6, HUD_R, HUD_G, HUD_B);
+		paint(4, 3, "[Esc]: Salir", HUDB_R, HUDB_G, HUDB_B, BG_R, BG_G, BG_B);
 
+		const std::string& name = data.player.songName;
+		const std::string& artist = data.player.artist;
+		if (name.empty()) {
+			paint(87, 3, "Sin cancion seleccionada", TITLE_R, TITLE_G, TITLE_B, BG_R, BG_G, BG_B);
+		}
+		else {
+			int nameX = (std::max)(4, 98 - visWidth(name) / 2);
+			int artistX = (std::max)(4, 98 - visWidth(artist) / 2);
+			paint(nameX, 3, fit(name, 60), TITLE_R, TITLE_G, TITLE_B, BG_R, BG_G, BG_B);
+			if (!artist.empty()) paint(artistX, 4, fit(artist, 60), SOFT_R, SOFT_G, SOFT_B, BG_R, BG_G, BG_B);
+		}
+
+		paint(176, 3, "Volume:", DIM_R, DIM_G, DIM_B, BG_R, BG_G, BG_B);
+		drawVolumeBar(184, 3, 5);
+		paint(193, 3, "80%", VOL_R, VOL_G, VOL_B, BG_R, BG_G, BG_B);
+
+		paint(161, 4, "Repeat", DIM_R, DIM_G, DIM_B, BG_R, BG_G, BG_B);
+		paint(168, 4, "/", DIM_R, DIM_G, DIM_B, BG_R, BG_G, BG_B);
+		paint(170, 4, "Random", DIM_R, DIM_G, DIM_B, BG_R, BG_G, BG_B);
+		paint(178, 4, "/", DIM_R, DIM_G, DIM_B, BG_R, BG_G, BG_B);
+		paint(180, 4, "Consume", ACCENT_R, 148, 255, BG_R, BG_G, BG_B);
+		paint(188, 4, "/", DIM_R, DIM_G, DIM_B, BG_R, BG_G, BG_B);
+		paint(190, 4, "Single", DIM_R, DIM_G, DIM_B, BG_R, BG_G, BG_B);
+	}
+
+	// ==== barra de tabs ====
+	struct TabInfo {
+		Tab tab;
+		const char* label;
+		int offset;
+	};
+	inline static const TabInfo kTabs[6] = {
+		{ Tab::LIBRARY, "Library", 64 },
+		{ Tab::PLAYLISTS, "Playlists", 80 },
+		{ Tab::LIKES, "Liked", 100 },
+		{ Tab::RECOMMENDED, "Recom.", 111 },
+		{ Tab::HISTORIAL, "Historial", 124 },
+		{ Tab::SEARCH, "Search", 143 }
+	};
+
+	static void drawTabsBar(const ViewData& data) {
+		drawBox(2, 8, 196, 3, PANEL_R, PANEL_G, PANEL_B);
+		fillRect(3, 9, 194, 1, ' ', PANEL_R, PANEL_G, PANEL_B, PANEL_R, PANEL_G, PANEL_B);
+
+		for (int i = 0; i < 6; i++) {
+			const TabInfo& ti = kTabs[i];
+			int tabX = 2 + ti.offset;
+			int tabWidth = (int)std::string(ti.label).size() + 4;
+			bool sel = (ti.tab == data.activeTab);
+
+			if (sel) {
+				fillRect(tabX, 9, tabWidth - 2, 1, ' ', 255, 255, 255, 40, 58, 78);
+				drawBox(tabX - 1, 8, tabWidth, 3, PANEL_R, PANEL_G, PANEL_B);
+				paint(tabX + 1, 9, ti.label, TITLE_R, TITLE_G, TITLE_B, 40, 58, 78);
+			}
+			else {
+				paint(tabX + 1, 9, ti.label, TEXT_R, TEXT_G, TEXT_B, PANEL_R, PANEL_G, PANEL_B);
+			}
+		}
+	}
+
+	// ==== tabla central ====
+	static void drawTableHeader(const ViewData& data) {
+		bool pl = (data.activeTab == Tab::PLAYLISTS);
+		bool rec = (data.activeTab == Tab::RECOMMENDED);
+		std::string c1 = colLabel(data, 1, pl ? "User" : "Artist");
+		std::string c2 = colLabel(data, 2, "Title");
+		std::string c3 = colLabel(data, 3, rec ? "Score" : (pl ? "Count" : "Duration"));
+		paint(4, 14, c1, HDR_R, HDR_G, HDR_B, BG_R, BG_G, BG_B);
+		paint(41, 14, c2, HDR_R, HDR_G, HDR_B, BG_R, BG_G, BG_B);
+		paint(112, 14, c3, HDR_R, HDR_G, HDR_B, BG_R, BG_G, BG_B);
+		hLine(4, 15, 116, G_H, PANEL_R, PANEL_G, PANEL_B, BG_R, BG_G, BG_B);
+	}
+
+	static void drawRows(const ViewData& data) {
 		int count = (int)data.rows.size();
-		for (int i = 0; i < VISIBLE_ROWS; ++i) {
-			int d = data.topRowIndex + i;
-			if (d > count) break;
-			bool sel = (d == data.selectedIndex);
-			if (playlist)
-				boxRow(playlistCells(data.rows[d - 1], d, sel));
-			else {
-				if (sel) {
-					// fila plana con fondo invertido
-					Cells flat = songCellsFlat(data.rows[d - 1], d);
-					std::string str;
-					for (auto& e : flat) str += e.second;
-					lineStart();
-					spaces(3);
-					put(FRAME, C_VD);
-					spaces(1);
-					put(REVERSE, padCol(str, BOX));
-					spaces(1);
-					put(FRAME, C_VD);
-					lineEnd();
-				}
-				else {
-					boxRow(songCells(data.rows[d - 1], d, false));
-				}
-			}
+		if (count == 0) {
+			paint(4, 17, emptyMessage(data.activeTab), DIM_R, DIM_G, DIM_B, BG_R, BG_G, BG_B);
+			return;
 		}
-		boxH(C_BL, C_BR);   // piso
-	}
 
-	// ==== reproductor ====
+		bool pl = (data.activeTab == Tab::PLAYLISTS);
+		for (int i = 0; i < VISIBLE_ROWS; i++) {
+			int row = data.topRowIndex + i;
+			int yy = 17 + i * 2;
+			if (row > count) {
+				fillRect(3, yy, 117, 1, ' ', BG_R, BG_G, BG_B, BG_R, BG_G, BG_B);
+				continue;
+			}
+			const RowData& rd = data.rows[row - 1];
+			bool sel = (row == data.selectedIndex);
+			int r = sel ? SELECT_R : BG_R;
+			int g = sel ? SELECT_G : BG_G;
+			int b = sel ? SELECT_B : BG_B;
 
-	static void drawPlayer(const PlayerData& p) {
-		boxH(C_TL, C_TR);
+			fillRect(3, yy, 117, 1, ' ', r, g, b, r, g, b);
 
-		// renglon "NOW"
-		{
-			Cells c;
-			if (p.state == PlayerState::STOPPED || p.songName.empty()) {
-				c.emplace_back(DIM, " " + PLAY_SYM + "   --- sin cancion ---");
+			std::string c1 = fit(rd.artist, 30);
+			if (pl && rd.artist.empty()) c1 = "You";
+			std::string c2 = fit(rd.title, 45);
+			std::string c3 = thirdValue(rd, data.activeTab);
+
+			if (sel) {
+				paint(4, yy, c1, TITLE_R, TITLE_G, TITLE_B, r, g, b);
+				paint(41, yy, c2, TITLE_R, TITLE_G, TITLE_B, r, g, b);
+				paint(112, yy, c3, TITLE_R, TITLE_G, TITLE_B, r, g, b);
 			}
 			else {
-				c.emplace_back(GREEN + BOLD, " " + PLAY_SYM + "  ");
-				c.emplace_back(BOLD, fit(p.songName, 26));
-				c.emplace_back(DIM, "  -  " + fit(p.artist, 16));
-				// controls a la derecha
-				std::string ctrl = PREV_SYM + "  " + (p.state == PlayerState::PAUSED ? PLAY_SYM : PAUSE_SYM) + "  " + NEXT_SYM;
-				int used = 4 + (int)visWidth(fit(p.songName, 26)) + 4 + (int)visWidth(fit(p.artist, 16));
-				int gutter = BOX - used - visWidth(ctrl) - 6;
-				c.emplace_back("", std::string(gutter < 1 ? 1 : gutter, ' '));
-				c.emplace_back(BOLD, ctrl);
+				paint(4, yy, c1, SOFT_R, SOFT_G, SOFT_B, r, g, b);
+				paint(41, yy, c2, SOFT_R, SOFT_G, SOFT_B, r, g, b);
+				paint(112, yy, c3, SOFT_R, SOFT_G, SOFT_B, r, g, b);
 			}
-			appendPad(c);
-			boxRow(c);
 		}
-
-		// renglon de estado y barra de progreso
-		{
-			Cells c;
-			std::string txt, col;
-			switch (p.state) {
-			case PlayerState::PLAYING: txt = "REPRODUCIENDO"; col = GREEN + BOLD; break;
-			case PlayerState::PAUSED: txt = "PAUSADO"; col = YELLOW + BOLD; break;
-			default: txt = "DETENIDO"; col = DIM; break;
-			}
-			c.emplace_back("", "  ");
-			c.emplace_back(DIM, "ESTADO:");
-			c.emplace_back("", " ");
-			c.emplace_back(col, txt);
-			c.emplace_back("", "      ");
-
-			int filled = 0;
-			if (p.length > 0) filled = (int)(p.position / p.length * 20);
-			if (filled < 0) filled = 0;
-			if (filled > 20) filled = 20;
-			std::string bar;
-			for (int i = 0; i < 20; ++i)
-				bar += (i < filled) ? BLOCK_SYM : SHADE_SYM;
-			c.emplace_back(GREEN, bar);
-
-			c.emplace_back(DIM, "  " + fmtTime(p.position) + " / " + fmtTime(p.length) + "  ");
-			appendPad(c);
-			boxRow(c);
-		}
-
-		boxH(C_BL, C_BR);
 	}
 
-	// ==== footer ====
-
-	static void drawFooter() {
-		centeredLine(DIM, "   ↑/↓ mover    ·    L P K D R tabs    ·    Enter abrir/reproducir    ·    Esc volver    ·    Q salir");
-		centeredLine(DIM, "   Espacio pausa/reanudar    ·    M me gusta    ·    N no me gusta");
+	// ==== panel derecho (portada procedural) ====
+	static int artCode(int row, int col) {
+		int dx = row - 12;
+		int dy = col - 12;
+		int d2 = dx * dx + dy * dy;
+		if (d2 <= 14) return 24;                 // nucleo blanco
+		if (d2 <= 40) return 6;                  // halo lila
+		if (d2 <= 80) return 5;                  // halo purpura
+		return 2 + ((row * 7 + col * 3) % 17);   // nebulosa exterior
 	}
 
-public:
-	// Inicializa la consola (UTF-8 + ANSI) y oculta el cursor.
-	static void init() {
+	static void getAlbumArtColor(int code, int& r, int& g, int& b) {
+		switch (code) {
+		case 1:  r = 0;   g = 0;   b = 0;   break;
+		case 2:  r = 20;  g = 15;  b = 45;  break;
+		case 3:  r = 45;  g = 70;  b = 140; break;
+		case 4:  r = 18;  g = 38;  b = 72;  break;
+		case 5:  r = 110; g = 70;  b = 205; break;
+		case 6:  r = 185; g = 145; b = 255; break;
+		case 7:  r = 125; g = 195; b = 255; break;
+		case 8:  r = 28;  g = 105; b = 185; break;
+		case 9:  r = 3;   g = 6;   b = 14;  break;
+		case 10: r = 12;  g = 16;  b = 32;  break;
+		case 11: r = 170; g = 245; b = 255; break;
+		case 12: r = 0;   g = 10;  b = 22;  break;
+		case 13: r = 45;  g = 200; b = 235; break;
+		case 14: r = 0;   g = 55;  b = 95;  break;
+		case 15: r = 215; g = 175; b = 255; break;
+		case 16: r = 60;  g = 30;  b = 120; break;
+		case 17: r = 25;  g = 135; b = 175; break;
+		case 18: r = 18;  g = 20;  b = 45;  break;
+		case 19: r = 0;   g = 32;  b = 50;  break;
+		case 20: r = 45;  g = 28;  b = 90;  break;
+		case 21: r = 240; g = 210; b = 255; break;
+		case 22: r = 90;  g = 85;  b = 160; break;
+		case 23: r = 12;  g = 90;  b = 130; break;
+		case 24: r = 255; g = 255; b = 255; break;
+		default: r = 0;   g = 0;   b = 0;   break;
+		}
+	}
+
+	static void paintBlock(int x, int y, int r, int g, int b) {
+		setPos(x, y);
+		std::cout << "\x1b[38;2;" << r << ";" << g << ";" << b << "m"
+			<< G_BLOCK << G_BLOCK << "\x1b[0m";
+	}
+
+	static void drawAlbumArt(int x, int y) {
+		for (int row = 0; row < 25; row++) {
+			for (int col = 0; col < 25; col++) {
+				int r, g, b;
+				getAlbumArtColor(artCode(row, col), r, g, b);
+				paintBlock(x + col * 2, y + row, r, g, b);
+			}
+		}
+	}
+
+	static void drawRightPanel() {
+		drawBox(133, 16, 54, 27, PANEL_R, PANEL_G, PANEL_B);
+		drawAlbumArt(135, 17);
+	}
+
+	// ==== espectro (visual del modelo) ====
+	static void drawSpectrum(bool playing) {
+		static int frame = 0;
+		if (playing) frame++;
+
+		static const int colors[10][3] = {
+			{197, 120, 255}, {188, 126, 255}, {177, 138, 255}, {165, 152, 255}, {152, 166, 255},
+			{140, 180, 255}, {128, 194, 255}, {112, 206, 255}, {92, 214, 247}, {74, 220, 240}
+		};
+		const int bars = 21;
+		const int maxH = 6;
+
+		for (int i = 0; i < bars; i++) {
+			double w1 = std::sin(frame * 0.20 + i * 0.55);
+			double w2 = std::sin(frame * 0.11 + i * 0.30);
+			int h = 1 + (int)(((w1 + w2 + 2.0) / 4.0) * (maxH - 1));
+			int ci = (i < 10) ? i : 9;
+			int r = colors[ci][0];
+			int g = colors[ci][1];
+			int b = colors[ci][2];
+			for (int j = 0; j < maxH; j++) {
+				setPos(130 + i * 3, 50 - j);
+				if (j < h) std::cout << "\x1b[48;2;" << r << ";" << g << ";" << b << "m  \x1b[0m";
+				else std::cout << "\x1b[48;2;22;24;37m  \x1b[0m";
+			}
+		}
+	}
+
+	// ==== consola inferior ====
+	static void drawConsole() {
+		drawBox(2, 52, 196, 5, PANEL_R, PANEL_G, PANEL_B);
+		fillRect(3, 53, 50, 3, ' ', PANEL_R, PANEL_G, PANEL_B, PANEL_R, PANEL_G, PANEL_B);
+	}
+
+	static void drawHelp() {
+		paint(110, 53, "[Enter]", HELP_R, HELP_G, HELP_B, BG_R, BG_G, BG_B);
+		paint(117, 53, ": Reproducir / Entrar", HELP_T, HELP_T, HELP_T, BG_R, BG_G, BG_B);
+		paint(142, 53, "[Espacio]", HELP_R, HELP_G, HELP_B, BG_R, BG_G, BG_B);
+		paint(150, 53, ": Pausar / Reanudar", HELP_T, HELP_T, HELP_T, BG_R, BG_G, BG_B);
+		paint(172, 53, "[+]", HELP_R, HELP_G, HELP_B, BG_R, BG_G, BG_B);
+		paint(175, 53, ": Agregar a playlist", HELP_T, HELP_T, HELP_T, BG_R, BG_G, BG_B);
+
+		paint(110, 55, "[L]", HELP_R, HELP_G, HELP_B, BG_R, BG_G, BG_B);
+		paint(113, 55, ": Like", HELP_T, HELP_T, HELP_T, BG_R, BG_G, BG_B);
+		paint(122, 55, "[A/S/D]", HELP_R, HELP_G, HELP_B, BG_R, BG_G, BG_B);
+		paint(130, 55, ": Duracion", HELP_T, HELP_T, HELP_T, BG_R, BG_G, BG_B);
+		paint(143, 55, "[R/T]", HELP_R, HELP_G, HELP_B, BG_R, BG_G, BG_B);
+		paint(150, 55, ": Score", HELP_T, HELP_T, HELP_T, BG_R, BG_G, BG_B);
+		paint(160, 55, "[O/P]", HELP_R, HELP_G, HELP_B, BG_R, BG_G, BG_B);
+		paint(167, 55, ": Playlists", HELP_T, HELP_T, HELP_T, BG_R, BG_G, BG_B);
+		paint(181, 55, "[N/B]", HELP_R, HELP_G, HELP_B, BG_R, BG_G, BG_B);
+		paint(187, 55, ": Sig/Ant", HELP_T, HELP_T, HELP_T, BG_R, BG_G, BG_B);
+	}
+
+	// ==== seekbar inferior (progreso del reproductor) ====
+	static void drawSeekbar(const PlayerData& p) {
+		drawBox(2, 57, 196, 3, PANEL_R, PANEL_G, PANEL_B);
+
+		int inner = (196 - 2) / 2;
+		double ratio = (p.length > 0) ? (p.position / p.length) : 0.0;
+		ratio = (std::max)(0.0, (std::min)(ratio, 1.0));
+		int filled = (int)(inner * ratio);
+
+		for (int i = 0; i < inner; i++) {
+			int r, g, b;
+			if (i < filled) {
+				r = (std::min)(255, 94 + i);
+				g = 210;
+				b = (std::min)(255, 176 + (i / 2));
+			}
+			else {
+				r = 34; g = 41; b = 61;
+			}
+			setPos(3 + i * 2, 58);
+			std::cout << "\x1b[48;2;" << r << ";" << g << ";" << b << "m  \x1b[0m";
+		}
+	}
+
+	static void ensureInit() {
+		if (initialized) return;
+		initialized = true;
+
 		SetConsoleOutputCP(CP_UTF8);
 		HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 		DWORD mode = 0;
 		if (GetConsoleMode(h, &mode)) {
 			SetConsoleMode(h, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
 		}
-		std::cout << "\x1b[?25l";
+		setvbuf(stdout, nullptr, _IONBF, 0);
+		std::cout << "\x1b[?25l\x1b[0m";
+
+		// Amplia el buffer a 200x60 (la ventana se ajustara si la pantalla alcanza).
+		try { System::Console::BufferWidth = 200; } catch (...) {}
+		try { System::Console::WindowWidth = 200; } catch (...) {}
+		try { System::Console::WindowHeight = SCREEN_H; } catch (...) {}
+
+		try {
+			int bW = System::Console::BufferWidth;
+			int bH = System::Console::BufferHeight;
+			bufW = (std::min)(bW, SCREEN_W);
+			bufH = (std::min)(bH, SCREEN_H);
+		}
+		catch (...) {}
 	}
 
-	// Dibuja el cuadro completo.
+public:
+	static void init() {
+		ensureInit();
+	}
+
 	void render(const ViewData& data) {
-		std::cout << "\x1b[2J\x1b[H";
-		outerCorner(C_TL, C_TR);
-		drawHeader(data);
-		lineStart(); lineEnd();          // linea en blanco
-		drawTabs(data);
-		lineStart(); lineEnd();          // separa tabs del panel
-		drawListTitle(data);
-		drawList(data);
-		lineStart(); lineEnd();
-		drawPlayer(data.player);
-		lineStart(); lineEnd();
-		drawFooter();
-		outerCorner(C_BL, C_BR);
+		ensureInit();
+		clearAll();
+
+		drawHud(data);
+		drawTabsBar(data);
+
+		fillRect(4, 11, 20, 1, ' ', PANEL_R, PANEL_G, PANEL_B, PANEL_R, PANEL_G, PANEL_B);
+		drawBox(2, 12, 196, 40, PANEL_R, PANEL_G, PANEL_B);
+		drawTableHeader(data);
+		drawRows(data);
+		vLine(121, 13, 38, G_V, PANEL_R, PANEL_G, PANEL_B, BG_R, BG_G, BG_B);
+
+		if (data.activeTab != Tab::PLAYLISTS) drawRightPanel();
+
+		drawConsole();
+		drawHelp();
+		drawSeekbar(data.player);
+		drawSpectrum(data.player.state == PlayerState::PLAYING);
+
+		std::cout << std::flush;
 	}
 };

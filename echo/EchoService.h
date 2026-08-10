@@ -78,6 +78,7 @@ public:
 				row.genre = song.getGenre();
 				row.likes = song.getLikesCount();
 				row.isLiked = currAccount.getLikedSongs().contains(song.getIdSong());
+				row.duration = song.getLength();
 				row.isPlaying = (song.getIdSong() == library.getCurrentSongId());
 				row.isPlaylist = false;
 				row.playlistSize = -1;
