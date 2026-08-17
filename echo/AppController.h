@@ -34,7 +34,14 @@ public:
 				authFlow(true);
 				break;
 			case Screen::MAIN:
-				if (!mainRun()) return;
+				if (!mainRun()) {
+					echoService.logout();
+					echoService.saveGeneralService();
+					echoService.savePersonalService();
+					screen = Screen::WELCOME;
+					ui.renderWelcome(0);
+					welcomeIndex = 0;
+				}
 				break;
 			}
 		}
@@ -54,10 +61,18 @@ private:
 				switch (welcomeIndex) {
 				case 0: screen = Screen::LOGIN; break;
 				case 1: screen = Screen::REGISTER; break;
-				case 2: return false;                 // salir
+				case 2: { // salir
+					echoService.saveGeneralService();
+					echoService.savePersonalService();
+					return false;
+				}                
 				}
 			}
-			else if (key == 27) return false;          // Esc
+			else if (key == 27) { // Esc
+				echoService.saveGeneralService();
+				echoService.savePersonalService();
+				return false;
+			}
 			else if (key == 72 && welcomeIndex > 0) {  // flecha arriba
 				int old = welcomeIndex;
 				welcomeIndex--;

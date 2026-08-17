@@ -43,6 +43,10 @@ public:
 		FileManager::saveGeneralData(library.getAllSongs(), albums);
 	}
 
+	void savePersonalService() {
+		FileManager::savePersonalData(currAccount);
+	}
+
 	void unloadAccountService() {
 		FileManager::savePersonalData(currAccount);
 		currAccount = Account();
