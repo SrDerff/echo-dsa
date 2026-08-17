@@ -66,7 +66,7 @@ private:
 	static const int HELP_R = 198, HELP_G = 148, HELP_B = 255;  // teclas de ayuda
 	static const int HELP_T = 220;                              // texto de ayuda
 
-	static const int SCREEN_W = 196;
+	static const int SCREEN_W = 198;
 	static const int SCREEN_H = 60;
 	static const int VISIBLE_ROWS = 17;
 
@@ -503,7 +503,6 @@ public:
 		drawHud(data);
 		drawTabsBar(data);
 
-		fillRect(4, 11, 20, 1, ' ', PANEL_R, PANEL_G, PANEL_B, PANEL_R, PANEL_G, PANEL_B);
 		drawBox(2, 12, 196, 40, PANEL_R, PANEL_G, PANEL_B);
 		drawTableHeader(data);
 		drawRows(data);
