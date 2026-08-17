@@ -1,16 +1,30 @@
 [
     {
+        "dislikedSongs": [],
         "id": 1,
-        "user": "demo",
+        "likedSongs": [
+            1000
+        ],
         "password": "hash123",
-        "vip": false,
         "playlists": [
             {
                 "name": "Favoritas",
-                "songs": [1000, 1001]
+                "songs": [
+                    1000,
+                    1001
+                ]
             }
         ],
-        "likedSongs": [1000],
-        "dislikedSongs": []
+        "user": "demo",
+        "vip": false
+    },
+    {
+        "dislikedSongs": [],
+        "id": 2,
+        "likedSongs": [],
+        "password": "asdsadsad",
+        "playlists": [],
+        "user": "XDsadasdasasdasdasd",
+        "vip": false
     }
 ]

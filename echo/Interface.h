@@ -102,6 +102,10 @@ private:
 		for (int i = 0; i < len; i++) paint(x + i, y, glyph, fr, fg, fb, br, bg, bb);
 	}
 
+	static void hLine(int x, int y, int len, const std::string& glyph, int fr, int fg, int fb) {
+		for (int i = 0; i < len; i++) paint(x + i, y, glyph, fr, fg, fb, BG_R, BG_G, BG_B);
+	}
+
 	static void vLine(int x, int y, int len, const std::string& glyph, int fr, int fg, int fb, int br, int bg, int bb) {
 		for (int i = 0; i < len; i++) paint(x, y + i, glyph, fr, fg, fb, br, bg, bb);
 	}
@@ -486,15 +490,6 @@ private:
 		paint(x, y, text, fr, fg, fb, br, bg, bb);
 	}
 
-	static void drawAuthInput(int x, int y, const std::string& shown, bool focused) {
-		int fR = focused ? ACCENT_R : PANEL_R;
-		int fG = focused ? ACCENT_G : PANEL_G;
-		int fB = focused ? ACCENT_B : PANEL_B;
-		fillRect(x, y, 60, 3, ' ', CARD_R, CARD_G, CARD_B, CARD_R, CARD_G, CARD_B);
-		drawBox(x, y, 60, 3, fR, fG, fB);
-		paint(x + 2, y + 1, shown, TEXT_R, TEXT_G, TEXT_B, CARD_R, CARD_G, CARD_B);
-	}
-
 	static void drawWelcomeOption(int i, bool selected) {
 		static const int optCol[3][3] = {
 			{137, 172, 118},   // iniciar sesion
@@ -521,7 +516,7 @@ private:
 	}
 
 	static void renderAuthScreen(const std::string& title, const std::string& subtitle,
-		const std::string& user, const std::string& pass, bool focusUser, const std::string& error) {
+		const std::string& error) {
 		clearScreen();
 
 		const int cR = PANEL_R, cG = PANEL_G, cB = PANEL_B;      // cian
@@ -531,42 +526,35 @@ private:
 		const int cardR = 34, cardG = 38, cardB = 55;            // panel oscuro
 		const int lR = 62, lG = 130, lB = 160;                   // linea decorativa
 
-
 		// titulo decorado
-		paint(79, 18, "--------", cR, cG, cB, cardR, cardG, cardB);
-		paint(88, 18, "*", cR, cG, cB, cardR, cardG, cardB);
-		centerText(18, title, pR, pG, pB, cardR, cardG, cardB);
+		paintDefault(79, 18, "--------", cR, cG, cB);
+		paintDefault(88, 18, "*", cR, cG, cB);
+		centerDefault(18, title, pR, pG, pB);
 		int titleEnd = 98 + visWidth(title) / 2 + 2;
-		paint(titleEnd, 18, "*", cR, cG, cB, cardR, cardG, cardB);
-		paint(titleEnd + 2, 18, "--------", cR, cG, cB, cardR, cardG, cardB);
+		paintDefault(titleEnd, 18, "*", cR, cG, cB);
+		paintDefault(titleEnd + 2, 18, "--------", cR, cG, cB);
 
-		centerText(21, subtitle, tR, tG, tB, cardR, cardG, cardB);
+		centerDefault(21, subtitle, tR, tG, tB);
 
-		hLine(62, 24, 34, "-", lR, lG, lB, cardR, cardG, cardB);
-		paint(97, 24, "<>", cR, cG, cB, cardR, cardG, cardB);
-		hLine(101, 24, 34, "-", lR, lG, lB, cardR, cardG, cardB);
+		hLine(62, 24, 34, "-", lR, lG, lB);
+		paintDefault(97, 24, "<>", cR, cG, cB);
+		hLine(101, 24, 34, "-", lR, lG, lB);
 
 		drawBox(53, 27, 90, 16, cR, cG, cB);
 		drawBox(79, 26, 38, 3, cR, cG, cB);
 		fillRect(80, 27, 36, 1, ' ', cR, cG, cB, cR, cG, cB);
 		centerText(27, "Ingresa tus datos", tR, tG, tB, cR, cG, cB);
 
-		paint(60, 33, "Usuario: ", cR, cG, cB, cardR, cardG, cardB);
-		paint(60, 37, "Contrasena: ", cR, cG, cB, cardR, cardG, cardB);
-
-		std::string shownUser = fit(user, 54);
-		std::string shownPass(pass.size(), '*');
-		if (focusUser) shownUser += "_";
-		else shownPass += "_";
-
-		drawAuthInput(76, 32, shownUser, focusUser);
-		drawAuthInput(76, 36, shownPass, !focusUser);
+		paintDefault(60, 33, "Usuario: ", cR, cG, cB);
+		paintDefault(60, 37, "Contrasena: ", cR, cG, cB);
+		drawBox(76, 32, 60, 3, cR, cG, cB);
+		drawBox(76, 36, 60, 3, cR, cG, cB);
 
 		if (!error.empty()) {
-			paint(60, 40, error, 255, 90, 90, CARD_R, CARD_G, CARD_B);
+			paint(60, 40, error, 255, 90, 90, cardR, cardG, cardB);
 		}
 
-		centerDefault(49, "[Enter] Continuar    [Tab / Arriba / Abajo] Campo    [Esc] Volver", dR, dG, dB);
+		centerDefault(49, "[Enter] Continuar            [Deja el usuario vacio y pulsa Enter para volver]", dR, dG, dB);
 	}
 
 	static void renderWelcomeScreen(int selected) {
@@ -579,18 +567,18 @@ private:
 		const int lR = 62, lG = 130, lB = 160;
 		const int cardR = 34, cardG = 38, cardB = 55;
 
-		paint(81, 18, "--------", cR, cG, cB, cardR, cardG, cardB);
-		paint(90, 18, "*", cR, cG, cB, cardR, cardG, cardB);
-		centerText(18, "Bienvenido", pR, pG, pB, cardR, cardG, cardB);
+		paintDefault(81, 18, "--------", cR, cG, cB);
+		paintDefault(90, 18, "*", cR, cG, cB);
+		centerDefault(18, "Bienvenido", pR, pG, pB);
 		int titleEnd = 98 + visWidth("Bienvenido") / 2 + 2;
-		paint(titleEnd, 18, "*", cR, cG, cB, cardR, cardG, cardB);
-		paint(titleEnd + 2, 18, "--------", cR, cG, cB, cardR, cardG, cardB);
+		paintDefault(titleEnd, 18, "*", cR, cG, cB);
+		paintDefault(titleEnd + 2, 18, "--------", cR, cG, cB);
 
-		centerText(21, "Disfruta tu musica favorita desde la terminal.", tR, tG, tB, cardR, cardG, cardB);
+		centerDefault(21, "Disfruta tu musica favorita desde la terminal.", tR, tG, tB);
 
-		hLine(62, 24, 34, "-", lR, lG, lB, cardR, cardG, cardB);
-		paint(97, 24, "<>", cR, cG, cB, cardR, cardG, cardB);
-		hLine(101, 24, 34, "-", lR, lG, lB, cardR, cardG, cardB);
+		hLine(62, 24, 34, "-", lR, lG, lB);
+		paintDefault(97, 24, "<>", cR, cG, cB);
+		hLine(101, 24, 34, "-", lR, lG, lB);
 
 		drawBox(53, 27, 90, 16, cR, cG, cB);
 		drawBox(79, 26, 38, 3, cR, cG, cB);
@@ -667,15 +655,15 @@ public:
 		std::cout << std::flush;
 	}
 
-	void renderLogin(const std::string& user, const std::string& pass, bool focusUser, const std::string& error) {
+	void renderLogin(const std::string& error) {
 		ensureInit();
-		renderAuthScreen("Iniciar Sesion", "Ingresa tus credenciales para continuar.", user, pass, focusUser, error);
+		renderAuthScreen("Iniciar Sesion", "Ingresa tus credenciales para continuar.", error);
 		std::cout << std::flush;
 	}
 
-	void renderRegister(const std::string& user, const std::string& pass, bool focusUser, const std::string& error) {
+	void renderRegister(const std::string& error) {
 		ensureInit();
-		renderAuthScreen("Registrarse", "Ingresa tus credenciales para continuar.", user, pass, focusUser, error);
+		renderAuthScreen("Registrarse", "Ingresa tus credenciales para continuar.", error);
 		std::cout << std::flush;
 	}
 
@@ -688,21 +676,22 @@ public:
 		std::cout << std::flush;
 	}
 
-	void updateAuthInputs(const std::string& user, const std::string& pass, bool focusUser) {
+	void placeAuthCursor(int field) {
 		ensureInit();
-		std::string shownUser = fit(user, 54);
-		std::string shownPass(pass.size(), '*');
-		if (focusUser) shownUser += "_";
-		else shownPass += "_";
-		drawAuthInput(76, 32, shownUser, focusUser);
-		drawAuthInput(76, 36, shownPass, !focusUser);
+		setPos(78, field == 0 ? 33 : 37);
+	}
+
+	void clearAuthFields() {
+		ensureInit();
+		paintDefault(77, 33, "                                                          ", DIM_R, DIM_G, DIM_B);
+		paintDefault(77, 37, "                                                          ", DIM_R, DIM_G, DIM_B);
 		std::cout << std::flush;
 	}
 
 	void updateAuthError(const std::string& error) {
 		ensureInit();
-		fillRect(60, 40, 60, 1, ' ', CARD_R, CARD_G, CARD_B, CARD_R, CARD_G, CARD_B);
-		if (!error.empty()) paint(60, 40, error, 255, 90, 90, CARD_R, CARD_G, CARD_B);
+		paintDefault(60, 40, "                                                        ", DIM_R, DIM_G, DIM_B);
+		if (!error.empty()) paintDefault(60, 40, error, 255, 90, 90);
 		std::cout << std::flush;
 	}
 };
