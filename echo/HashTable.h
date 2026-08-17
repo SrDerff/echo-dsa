@@ -45,26 +45,26 @@ private:
         }
     }
 
-        size_t findIndex(const K& key) const {
-            size_t index = hash(key) % capacity;
-            size_t probed = 0;
+    size_t findIndex(const K& key) const {
+        size_t index = hash(key) % capacity;
+        size_t probed = 0;
 
-            while (probed < capacity) {
-                if (!bucket[index].has_value())
-                    return capacity;
+        while (probed < capacity) {
+            if (!bucket[index].has_value())
+                return capacity;
 
-                if (bucket[index]->state == STATE::OCCUPIED &&
-                    bucket[index]->key == key)
-                {
-                    return index;
-                }
-
-                index = (index + 1) % capacity;
-                ++probed;
+            if (bucket[index]->state == STATE::OCCUPIED &&
+                bucket[index]->key == key)
+            {
+                return index;
             }
 
-            return capacity;
+            index = (index + 1) % capacity;
+            ++probed;
         }
+
+        return capacity;
+    }
 
 public:
     class Iterator {

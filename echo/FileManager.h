@@ -213,6 +213,41 @@ public:
 		outFile << data.dump(4);
 	}
 
+	// Busca un usuario por nombre. Devuelve true si existe y completa
+	// su contrasena (texto plano) y su id.
+	static bool findUser(const std::string& user, std::string& passOut, int& idOut) {
+		std::ifstream file(PATH_ACCOUNT);
+		if (!file.is_open()) return false;
+
+		json data;
+		file >> data;
+
+		for (const auto& acc : data) {
+			if (acc["user"] == user) {
+				passOut = acc["password"];
+				idOut = (int)acc["id"];
+				return true;
+			}
+		}
+		return false;
+	}
+
+	// Devuelve el siguiente id de cuenta disponible (maximo existente + 1).
+	static int getNextUserId() {
+		std::ifstream file(PATH_ACCOUNT);
+		if (!file.is_open()) return 1;
+
+		json data;
+		file >> data;
+
+		int maxId = 0;
+		for (const auto& acc : data) {
+			int id = (int)acc["id"];
+			if (id > maxId) maxId = id;
+		}
+		return maxId + 1;
+	}
+
 private:
 	static json buildAccountJson(Account& acc) {
 		json accJson;

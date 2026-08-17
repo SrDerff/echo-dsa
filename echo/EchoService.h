@@ -60,6 +60,40 @@ public:
 
 	}
 
+	//SESSION
+
+	bool login(const std::string& user, const std::string& pass) {
+		std::string storedPass;
+		int id = -1;
+		if (!FileManager::findUser(user, storedPass, id)) return false;
+		if (storedPass != pass) return false;
+
+		currAccount = Account(id, user, storedPass, false);
+		loadAccountService();
+		buildViewData();
+		return true;
+	}
+
+	bool registerAccount(const std::string& user, const std::string& pass) {
+		if (user.empty() || pass.empty()) return false;
+
+		std::string dummy;
+		int dummyId;
+		if (FileManager::findUser(user, dummy, dummyId)) return false;
+
+		int id = FileManager::getNextUserId();
+		currAccount = Account(id, user, pass, false);
+		FileManager::savePersonalData(currAccount);
+		loadAccountService();
+		buildViewData();
+		return true;
+	}
+
+	void logout() {
+		currAccount = Account();
+		buildViewData();
+	}
+
 	//VIEW DATA
 	void buildViewData() {
 		viewData.activeTab = activeTab;

@@ -464,6 +464,140 @@ private:
 		}
 	}
 
+	// ==== pantallas de sesion (fondo por defecto de la consola) ====
+	static void clearScreen() {
+		std::cout << "\x1b[0m\x1b[2J" << std::flush;
+	}
+
+	static void paintDefault(int x, int y, const std::string& s, int fr, int fg, int fb) {
+		setPos(x, y);
+		std::cout << "\x1b[38;2;" << fr << ";" << fg << ";" << fb << ";49m"
+			<< s << "\x1b[0m";
+	}
+
+	static void centerDefault(int y, const std::string& text, int fr, int fg, int fb) {
+		int x = 98 - visWidth(text) / 2;
+		paintDefault(x, y, text, fr, fg, fb);
+	}
+
+	static void centerText(int y, const std::string& text, int fr, int fg, int fb, int br, int bg, int bb) {
+		int x = 98 - visWidth(text) / 2;
+		paint(x, y, text, fr, fg, fb, br, bg, bb);
+	}
+
+	static void renderAuthScreen(const std::string& title, const std::string& subtitle,
+		const std::string& user, const std::string& pass, bool focusUser, const std::string& error) {
+		clearScreen();
+
+		const int cR = PANEL_R, cG = PANEL_G, cB = PANEL_B;      // cian
+		const int pR = ACCENT_R, pG = ACCENT_G, pB = ACCENT_B;   // morado
+		const int tR = TEXT_R, tG = TEXT_G, tB = TEXT_B;         // texto claro
+		const int dR = DIM_R, dG = DIM_G, dB = DIM_B;            // texto tenue
+		const int cardR = 34, cardG = 38, cardB = 55;            // panel oscuro
+		const int lR = 62, lG = 130, lB = 160;                   // linea decorativa
+
+		fillRect(48, 14, 100, 33, ' ', cardR, cardG, cardB, cardR, cardG, cardB);
+
+		// titulo decorado
+		paint(72, 18, "--------", cR, cG, cB, cardR, cardG, cardB);
+		paint(82, 18, "*", cR, cG, cB, cardR, cardG, cardB);
+		centerText(18, title, pR, pG, pB, cardR, cardG, cardB);
+		int titleEnd = 98 + visWidth(title) / 2 + 2;
+		paint(titleEnd, 18, "*", cR, cG, cB, cardR, cardG, cardB);
+		paint(titleEnd + 2, 18, "--------", cR, cG, cB, cardR, cardG, cardB);
+
+		centerText(21, subtitle, tR, tG, tB, cardR, cardG, cardB);
+
+		hLine(62, 24, 34, "-", lR, lG, lB, cardR, cardG, cardB);
+		paint(97, 24, "<>", cR, cG, cB, cardR, cardG, cardB);
+		hLine(101, 24, 34, "-", lR, lG, lB, cardR, cardG, cardB);
+
+		drawBox(53, 27, 90, 16, cR, cG, cB);
+		drawBox(79, 26, 38, 3, cR, cG, cB);
+		fillRect(80, 27, 36, 1, ' ', cR, cG, cB, cR, cG, cB);
+		centerText(28, "Ingresa tus datos", cR, cG, cB, cR, cG, cB);
+
+		paint(60, 33, "Usuario: ", cR, cG, cB, cardR, cardG, cardB);
+		paint(60, 37, "Contrasena: ", cR, cG, cB, cardR, cardG, cardB);
+
+		std::string shownUser = fit(user, 54);
+		std::string shownPass(pass.size(), '*');
+		if (focusUser) shownUser += "_";
+		else shownPass += "_";
+
+		int aR = focusUser ? pR : cR, aG = focusUser ? pG : cG, aB = focusUser ? pB : cB;
+		drawBox(76, 32, 60, 3, aR, aG, aB);
+		paint(78, 33, shownUser, tR, tG, tB, cardR, cardG, cardB);
+
+		int bR = focusUser ? cR : pR, bG = focusUser ? cG : pG, bB = focusUser ? cB : pB;
+		drawBox(76, 36, 60, 3, bR, bG, bB);
+		paint(78, 37, shownPass, tR, tG, tB, cardR, cardG, cardB);
+
+		if (!error.empty()) {
+			paint(60, 40, error, 255, 90, 90, cardR, cardG, cardB);
+		}
+
+		centerDefault(49, "[Enter] Continuar    [Tab / Arriba / Abajo] Campo    [Esc] Volver", dR, dG, dB);
+	}
+
+	static void renderWelcomeScreen(int selected) {
+		clearScreen();
+
+		const int cR = PANEL_R, cG = PANEL_G, cB = PANEL_B;
+		const int pR = ACCENT_R, pG = ACCENT_G, pB = ACCENT_B;
+		const int tR = TEXT_R, tG = TEXT_G, tB = TEXT_B;
+		const int dimR = DIM_R, dimG = DIM_G, dimB = DIM_B;
+		const int lR = 62, lG = 130, lB = 160;
+		const int cardR = 34, cardG = 38, cardB = 55;
+
+		paint(81, 18, "--------", cR, cG, cB, cardR, cardG, cardB);
+		paint(90, 18, "*", cR, cG, cB, cardR, cardG, cardB);
+		centerText(18, "Bienvenido", pR, pG, pB, cardR, cardG, cardB);
+		int titleEnd = 98 + visWidth("Bienvenido") / 2 + 2;
+		paint(titleEnd, 18, "*", cR, cG, cB, cardR, cardG, cardB);
+		paint(titleEnd + 2, 18, "--------", cR, cG, cB, cardR, cardG, cardB);
+
+		centerText(21, "Disfruta tu musica favorita desde la terminal.", tR, tG, tB, cardR, cardG, cardB);
+
+		hLine(62, 24, 34, "-", lR, lG, lB, cardR, cardG, cardB);
+		paint(97, 24, "<>", cR, cG, cB, cardR, cardG, cardB);
+		hLine(101, 24, 34, "-", lR, lG, lB, cardR, cardG, cardB);
+
+		drawBox(53, 27, 90, 16, cR, cG, cB);
+		drawBox(79, 26, 38, 3, cR, cG, cB);
+		fillRect(80, 27, 36, 1, ' ', cR, cG, cB, cR, cG, cB);
+		centerText(27, "Selecciona una opcion", tR, tG, tB, cR, cG, cB);
+
+		static const int optCol[3][3] = {
+			{137, 172, 118},   // iniciar sesion
+			{201, 193, 105},   // registrarse
+			{204, 113, 98}     // salir
+		};
+		static const char* opts[3] = {
+			"[1]  Iniciar sesion",
+			"[2]  Registrarse",
+			"[3]  Salir del programa"
+		};
+
+		for (int i = 0; i < 3; i++) {
+			int y = 32 + i * 4;
+			int r = optCol[i][0], g = optCol[i][1], b = optCol[i][2];
+			if (i == selected) {
+				fillRect(57, y - 1, 82, 3, ' ', cardR, cardG, cardB, r, g, b);
+				paint(59, y, ">", cardR, cardG, cardB, r, g, b);
+				paint(62, y, opts[i], cardR, cardG, cardB, r, g, b);
+				paint(135, y, ">>", cardR, cardG, cardB, r, g, b);
+			}
+			else {
+				paint(62, y, opts[i], tR, tG, tB, cardR, cardG, cardB);
+			}
+		}
+
+		centerDefault(52, "Usa flechas ARRIBA/ABAJO y presiona [Enter] para seleccionar", 200, 190, 230);
+		paintDefault(3, 56, "Desarrollado en C++", dimR, dimG, dimB);
+		paintDefault(150, 56, "Presiona [Esc] en cualquier momento para salir", dimR, dimG, dimB);
+	}
+
 	static void ensureInit() {
 		if (initialized) return;
 		initialized = true;
@@ -503,6 +637,7 @@ public:
 		drawHud(data);
 		drawTabsBar(data);
 
+		fillRect(4, 11, 20, 1, ' ', PANEL_R, PANEL_G, PANEL_B, PANEL_R, PANEL_G, PANEL_B);
 		drawBox(2, 12, 196, 40, PANEL_R, PANEL_G, PANEL_B);
 		drawTableHeader(data);
 		drawRows(data);
@@ -515,6 +650,24 @@ public:
 		drawSeekbar(data.player);
 		drawSpectrum(data.player.state == PlayerState::PLAYING);
 
+		std::cout << std::flush;
+	}
+
+	void renderWelcome(int selectedIndex) {
+		ensureInit();
+		renderWelcomeScreen(selectedIndex);
+		std::cout << std::flush;
+	}
+
+	void renderLogin(const std::string& user, const std::string& pass, bool focusUser, const std::string& error) {
+		ensureInit();
+		renderAuthScreen("Iniciar Sesion", "Ingresa tus credenciales para continuar.", user, pass, focusUser, error);
+		std::cout << std::flush;
+	}
+
+	void renderRegister(const std::string& user, const std::string& pass, bool focusUser, const std::string& error) {
+		ensureInit();
+		renderAuthScreen("Registrarse", "Ingresa tus credenciales para continuar.", user, pass, focusUser, error);
 		std::cout << std::flush;
 	}
 };
