@@ -531,11 +531,10 @@ private:
 		const int cardR = 34, cardG = 38, cardB = 55;            // panel oscuro
 		const int lR = 62, lG = 130, lB = 160;                   // linea decorativa
 
-		fillRect(48, 14, 100, 33, ' ', cardR, cardG, cardB, cardR, cardG, cardB);
 
 		// titulo decorado
-		paint(72, 18, "--------", cR, cG, cB, cardR, cardG, cardB);
-		paint(82, 18, "*", cR, cG, cB, cardR, cardG, cardB);
+		paint(79, 18, "--------", cR, cG, cB, cardR, cardG, cardB);
+		paint(88, 18, "*", cR, cG, cB, cardR, cardG, cardB);
 		centerText(18, title, pR, pG, pB, cardR, cardG, cardB);
 		int titleEnd = 98 + visWidth(title) / 2 + 2;
 		paint(titleEnd, 18, "*", cR, cG, cB, cardR, cardG, cardB);
@@ -550,7 +549,7 @@ private:
 		drawBox(53, 27, 90, 16, cR, cG, cB);
 		drawBox(79, 26, 38, 3, cR, cG, cB);
 		fillRect(80, 27, 36, 1, ' ', cR, cG, cB, cR, cG, cB);
-		centerText(28, "Ingresa tus datos", cR, cG, cB, cR, cG, cB);
+		centerText(27, "Ingresa tus datos", tR, tG, tB, cR, cG, cB);
 
 		paint(60, 33, "Usuario: ", cR, cG, cB, cardR, cardG, cardB);
 		paint(60, 37, "Contrasena: ", cR, cG, cB, cardR, cardG, cardB);
