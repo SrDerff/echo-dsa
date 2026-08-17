@@ -65,6 +65,7 @@ private:
 	static const int VOL_R = 245, VOL_G = 166, VOL_B = 84;      // volumen
 	static const int HELP_R = 198, HELP_G = 148, HELP_B = 255;  // teclas de ayuda
 	static const int HELP_T = 220;                              // texto de ayuda
+	static const int CARD_R = 34, CARD_G = 38, CARD_B = 55;     // panel de sesion
 
 	static const int SCREEN_W = 198;
 	static const int SCREEN_H = 60;
@@ -485,6 +486,40 @@ private:
 		paint(x, y, text, fr, fg, fb, br, bg, bb);
 	}
 
+	static void drawAuthInput(int x, int y, const std::string& shown, bool focused) {
+		int fR = focused ? ACCENT_R : PANEL_R;
+		int fG = focused ? ACCENT_G : PANEL_G;
+		int fB = focused ? ACCENT_B : PANEL_B;
+		fillRect(x, y, 60, 3, ' ', CARD_R, CARD_G, CARD_B, CARD_R, CARD_G, CARD_B);
+		drawBox(x, y, 60, 3, fR, fG, fB);
+		paint(x + 2, y + 1, shown, TEXT_R, TEXT_G, TEXT_B, CARD_R, CARD_G, CARD_B);
+	}
+
+	static void drawWelcomeOption(int i, bool selected) {
+		static const int optCol[3][3] = {
+			{137, 172, 118},   // iniciar sesion
+			{201, 193, 105},   // registrarse
+			{204, 113, 98}     // salir
+		};
+		static const char* opts[3] = {
+			"[1]  Iniciar sesion",
+			"[2]  Registrarse",
+			"[3]  Salir del programa"
+		};
+		int y = 31 + i * 4;
+		int r = optCol[i][0], g = optCol[i][1], b = optCol[i][2];
+		fillRect(57, y - 1, 82, 3, ' ', CARD_R, CARD_G, CARD_B, CARD_R, CARD_G, CARD_B);
+		if (selected) {
+			fillRect(57, y - 1, 82, 3, ' ', CARD_R, CARD_G, CARD_B, r, g, b);
+			paint(59, y, ">", CARD_R, CARD_G, CARD_B, r, g, b);
+			paint(62, y, opts[i], CARD_R, CARD_G, CARD_B, r, g, b);
+			paint(135, y, ">>", CARD_R, CARD_G, CARD_B, r, g, b);
+		}
+		else {
+			paint(62, y, opts[i], TEXT_R, TEXT_G, TEXT_B, CARD_R, CARD_G, CARD_B);
+		}
+	}
+
 	static void renderAuthScreen(const std::string& title, const std::string& subtitle,
 		const std::string& user, const std::string& pass, bool focusUser, const std::string& error) {
 		clearScreen();
@@ -525,16 +560,11 @@ private:
 		if (focusUser) shownUser += "_";
 		else shownPass += "_";
 
-		int aR = focusUser ? pR : cR, aG = focusUser ? pG : cG, aB = focusUser ? pB : cB;
-		drawBox(76, 32, 60, 3, aR, aG, aB);
-		paint(78, 33, shownUser, tR, tG, tB, cardR, cardG, cardB);
-
-		int bR = focusUser ? cR : pR, bG = focusUser ? cG : pG, bB = focusUser ? cB : pB;
-		drawBox(76, 36, 60, 3, bR, bG, bB);
-		paint(78, 37, shownPass, tR, tG, tB, cardR, cardG, cardB);
+		drawAuthInput(76, 32, shownUser, focusUser);
+		drawAuthInput(76, 36, shownPass, !focusUser);
 
 		if (!error.empty()) {
-			paint(60, 40, error, 255, 90, 90, cardR, cardG, cardB);
+			paint(60, 40, error, 255, 90, 90, CARD_R, CARD_G, CARD_B);
 		}
 
 		centerDefault(49, "[Enter] Continuar    [Tab / Arriba / Abajo] Campo    [Esc] Volver", dR, dG, dB);
@@ -568,29 +598,8 @@ private:
 		fillRect(80, 27, 36, 1, ' ', cR, cG, cB, cR, cG, cB);
 		centerText(27, "Selecciona una opcion", tR, tG, tB, cR, cG, cB);
 
-		static const int optCol[3][3] = {
-			{137, 172, 118},   // iniciar sesion
-			{201, 193, 105},   // registrarse
-			{204, 113, 98}     // salir
-		};
-		static const char* opts[3] = {
-			"[1]  Iniciar sesion",
-			"[2]  Registrarse",
-			"[3]  Salir del programa"
-		};
-
 		for (int i = 0; i < 3; i++) {
-			int y = 32 + i * 4;
-			int r = optCol[i][0], g = optCol[i][1], b = optCol[i][2];
-			if (i == selected) {
-				fillRect(57, y - 1, 82, 3, ' ', cardR, cardG, cardB, r, g, b);
-				paint(59, y, ">", cardR, cardG, cardB, r, g, b);
-				paint(62, y, opts[i], cardR, cardG, cardB, r, g, b);
-				paint(135, y, ">>", cardR, cardG, cardB, r, g, b);
-			}
-			else {
-				paint(62, y, opts[i], tR, tG, tB, cardR, cardG, cardB);
-			}
+			drawWelcomeOption(i, i == selected);
 		}
 
 		centerDefault(52, "Usa flechas ARRIBA/ABAJO y presiona [Enter] para seleccionar", 200, 190, 230);
@@ -668,6 +677,33 @@ public:
 	void renderRegister(const std::string& user, const std::string& pass, bool focusUser, const std::string& error) {
 		ensureInit();
 		renderAuthScreen("Registrarse", "Ingresa tus credenciales para continuar.", user, pass, focusUser, error);
+		std::cout << std::flush;
+	}
+
+	void updateWelcome(int prevIndex, int newIndex) {
+		ensureInit();
+		if (prevIndex != newIndex) {
+			drawWelcomeOption(prevIndex, false);
+			drawWelcomeOption(newIndex, true);
+		}
+		std::cout << std::flush;
+	}
+
+	void updateAuthInputs(const std::string& user, const std::string& pass, bool focusUser) {
+		ensureInit();
+		std::string shownUser = fit(user, 54);
+		std::string shownPass(pass.size(), '*');
+		if (focusUser) shownUser += "_";
+		else shownPass += "_";
+		drawAuthInput(76, 32, shownUser, focusUser);
+		drawAuthInput(76, 36, shownPass, !focusUser);
+		std::cout << std::flush;
+	}
+
+	void updateAuthError(const std::string& error) {
+		ensureInit();
+		fillRect(60, 40, 60, 1, ' ', CARD_R, CARD_G, CARD_B, CARD_R, CARD_G, CARD_B);
+		if (!error.empty()) paint(60, 40, error, 255, 90, 90, CARD_R, CARD_G, CARD_B);
 		std::cout << std::flush;
 	}
 };

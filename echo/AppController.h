@@ -47,12 +47,14 @@ public:
 
 	bool welcomeKey(int key) {
 		if (key == 72 && welcomeIndex > 0) {          // flecha arriba
+			int old = welcomeIndex;
 			welcomeIndex--;
-			ui.renderWelcome(welcomeIndex);
+			ui.updateWelcome(old, welcomeIndex);
 		}
 		else if (key == 80 && welcomeIndex < 2) {     // flecha abajo
+			int old = welcomeIndex;
 			welcomeIndex++;
-			ui.renderWelcome(welcomeIndex);
+			ui.updateWelcome(old, welcomeIndex);
 		}
 		else if (key == 13) {                          // Enter
 			switch (welcomeIndex) {
@@ -81,17 +83,17 @@ public:
 					errorMsg = isRegister
 						? "El nombre de usuario ya existe."
 						: "Usuario o contrasena incorrectos.";
-					redrawAuth(isRegister);
+					ui.updateAuthError(errorMsg);
 				}
 			}
 			else {
 				focusUser = false;
-				redrawAuth(isRegister);
+				ui.updateAuthInputs(userInput, passInput, focusUser);
 			}
 		}
 		else if (key == 9 || key == 80 || key == 72) { // Tab / flechas: cambiar campo
 			focusUser = !focusUser;
-			redrawAuth(isRegister);
+			ui.updateAuthInputs(userInput, passInput, focusUser);
 		}
 		else if (key == 27) {                          // Esc: volver a la bienvenida
 			screen = Screen::WELCOME;
@@ -100,12 +102,12 @@ public:
 		else if (key == 8) {                           // Backspace
 			std::string& target = focusUser ? userInput : passInput;
 			if (!target.empty()) target.pop_back();
-			redrawAuth(isRegister);
+			ui.updateAuthInputs(userInput, passInput, focusUser);
 		}
 		else if (key >= 32 && key <= 126) {            // caracteres visibles
 			std::string& target = focusUser ? userInput : passInput;
 			if (target.size() < 40) target += (char)key;
-			redrawAuth(isRegister);
+			ui.updateAuthInputs(userInput, passInput, focusUser);
 		}
 		return true;
 	}
@@ -123,10 +125,5 @@ public:
 		passInput.clear();
 		focusUser = true;
 		errorMsg.clear();
-	}
-
-	void redrawAuth(bool isRegister) {
-		if (isRegister) ui.renderRegister(userInput, passInput, focusUser, errorMsg);
-		else ui.renderLogin(userInput, passInput, focusUser, errorMsg);
 	}
 };
