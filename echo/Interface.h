@@ -288,6 +288,40 @@ private:
 		hLine(4, 15, 116, G_H, PANEL_R, PANEL_G, PANEL_B, BG_R, BG_G, BG_B);
 	}
 
+	static void drawRowAt(const ViewData& data, int row) {
+		int count = (int)data.rows.size();
+		int yy = 17 + (row - data.topRowIndex) * 2;
+		if (row > count) {
+			fillRect(3, yy, 117, 1, ' ', BG_R, BG_G, BG_B, BG_R, BG_G, BG_B);
+			return;
+		}
+
+		bool pl = (data.activeTab == Tab::PLAYLISTS);
+		const RowData& rd = data.rows[row - 1];
+		bool sel = (row == data.selectedIndex);
+		int r = sel ? SELECT_R : BG_R;
+		int g = sel ? SELECT_G : BG_G;
+		int b = sel ? SELECT_B : BG_B;
+
+		fillRect(3, yy, 117, 1, ' ', r, g, b, r, g, b);
+
+		std::string c1 = fit(rd.artist, 30);
+		if (pl && rd.artist.empty()) c1 = "You";
+		std::string c2 = fit(rd.title, 45);
+		std::string c3 = thirdValue(rd, data.activeTab);
+
+		if (sel) {
+			paint(4, yy, c1, TITLE_R, TITLE_G, TITLE_B, r, g, b);
+			paint(41, yy, c2, TITLE_R, TITLE_G, TITLE_B, r, g, b);
+			paint(112, yy, c3, TITLE_R, TITLE_G, TITLE_B, r, g, b);
+		}
+		else {
+			paint(4, yy, c1, SOFT_R, SOFT_G, SOFT_B, r, g, b);
+			paint(41, yy, c2, SOFT_R, SOFT_G, SOFT_B, r, g, b);
+			paint(112, yy, c3, SOFT_R, SOFT_G, SOFT_B, r, g, b);
+		}
+	}
+
 	static void drawRows(const ViewData& data) {
 		int count = (int)data.rows.size();
 		if (count == 0) {
@@ -295,37 +329,8 @@ private:
 			return;
 		}
 
-		bool pl = (data.activeTab == Tab::PLAYLISTS);
 		for (int i = 0; i < VISIBLE_ROWS; i++) {
-			int row = data.topRowIndex + i;
-			int yy = 17 + i * 2;
-			if (row > count) {
-				fillRect(3, yy, 117, 1, ' ', BG_R, BG_G, BG_B, BG_R, BG_G, BG_B);
-				continue;
-			}
-			const RowData& rd = data.rows[row - 1];
-			bool sel = (row == data.selectedIndex);
-			int r = sel ? SELECT_R : BG_R;
-			int g = sel ? SELECT_G : BG_G;
-			int b = sel ? SELECT_B : BG_B;
-
-			fillRect(3, yy, 117, 1, ' ', r, g, b, r, g, b);
-
-			std::string c1 = fit(rd.artist, 30);
-			if (pl && rd.artist.empty()) c1 = "You";
-			std::string c2 = fit(rd.title, 45);
-			std::string c3 = thirdValue(rd, data.activeTab);
-
-			if (sel) {
-				paint(4, yy, c1, TITLE_R, TITLE_G, TITLE_B, r, g, b);
-				paint(41, yy, c2, TITLE_R, TITLE_G, TITLE_B, r, g, b);
-				paint(112, yy, c3, TITLE_R, TITLE_G, TITLE_B, r, g, b);
-			}
-			else {
-				paint(4, yy, c1, SOFT_R, SOFT_G, SOFT_B, r, g, b);
-				paint(41, yy, c2, SOFT_R, SOFT_G, SOFT_B, r, g, b);
-				paint(112, yy, c3, SOFT_R, SOFT_G, SOFT_B, r, g, b);
-			}
+			drawRowAt(data, data.topRowIndex + i);
 		}
 	}
 
@@ -633,7 +638,6 @@ public:
 		drawHud(data);
 		drawTabsBar(data);
 
-		fillRect(4, 11, 20, 1, ' ', PANEL_R, PANEL_G, PANEL_B, PANEL_R, PANEL_G, PANEL_B);
 		drawBox(2, 12, 196, 40, PANEL_R, PANEL_G, PANEL_B);
 		drawTableHeader(data);
 		drawRows(data);
@@ -672,6 +676,22 @@ public:
 		if (prevIndex != newIndex) {
 			drawWelcomeOption(prevIndex, false);
 			drawWelcomeOption(newIndex, true);
+		}
+		std::cout << std::flush;
+	}
+
+	void updateRow(const ViewData& data, int row) {
+		ensureInit();
+		if (row >= data.topRowIndex && row < data.topRowIndex + VISIBLE_ROWS) {
+			drawRowAt(data, row);
+		}
+		std::cout << std::flush;
+	}
+
+	void updateRows(const ViewData& data) {
+		ensureInit();
+		for (int i = 0; i < VISIBLE_ROWS; i++) {
+			drawRowAt(data, data.topRowIndex + i);
 		}
 		std::cout << std::flush;
 	}

@@ -17,6 +17,7 @@ private:
 	ViewData viewData;
 	Tab activeTab;
 	PlayerState playerState;
+	SoundAPI soundAPI;
 public:
 	EchoService() {
 		loadGeneralService();
@@ -56,8 +57,19 @@ public:
 		return library.getSongById(index);
 	}
 
-	void playSong() {
-		
+	Tab getActiveTab() {
+		return activeTab;
+	}
+
+	void playSong(int idSong) {
+		if (soundAPI.load(getSongById(idSong).getSourcePath())) { }
+		else std::cout << "error";   
+		if (soundAPI.play()) { }
+	}
+
+	void stopSong() {
+		if (soundAPI.stop()) { }
+		else std::cout << "error";
 	}
 
 	void quit() {
@@ -106,10 +118,10 @@ public:
 		viewData.rows.clear();
 		std::vector<RowData> _rows;
 		if (activeTab == Tab::LIBRARY) {
-			HashTable<int, Song>& allSongs = library.getAllSongs();
+			std::vector<int> songOrder = library.getSongOrder();
 			library.buildIndex();
-			for(auto it= allSongs.begin(); it != allSongs.end(); ++it) {
-				Song& song = it.getValue();
+			for (size_t i = 0; i < songOrder.size();i++) {
+				Song& song = library.getSongById(songOrder[i]);
 				RowData row;
 				row.title = song.getName();
 				row.artist = song.getAuthor();
@@ -126,16 +138,16 @@ public:
 		}
 		viewData.rows = _rows;
 
-		viewData.selectedIndex = 1;
-		viewData.topRowIndex = 1;
+		viewData.selectedIndex = library.getTopRowIndex() + library.getCurrentRowIndex() + 1;
+		viewData.topRowIndex = library.getTopRowIndex() + 1;
 
 		//test
 		PlayerData _playerData;
-		_playerData.songName = "Test Song";
-		_playerData.artist = "Test Artist";
+		_playerData.songName = "No song playing";
+		_playerData.artist = "No artist";
 		_playerData.state = playerState;
-		_playerData.length = 180.0f;
-		_playerData.position = 45.0f;
+		_playerData.length = 0.0f;
+		_playerData.position = 0.0f;
 
 		viewData.player = _playerData;
 	}
@@ -160,6 +172,23 @@ public:
 
 	bool removeDislikeSong(int idSong) {
 		return currAccount.removeDislikeSong(idSong);
+	}
+
+	//LIBRARY
+	int getVisibleRows() { return library.getVisibleRows(); }
+	int getTopRowIndex() { return library.getTopRowIndex(); }
+	int getCurrentRowIndex() { return library.getCurrentRowIndex(); }
+	int getCurrentSongId() { return library.getCurrentSongId(); }
+
+	void setVisibleRows(int rows) { library.setVisibleRows(rows); }
+	void setTopRowIndex(int row) { library.setTopRowIndex(row); }
+	void setCurrentRowIndex(int row) { library.setCurrentRowIndex(row); }
+
+	int getLibrarySize() const { return library.getCount(); }
+
+	void moveSelection(int delta) {
+		library.moveCursor(delta);
+		buildViewData();
 	}
 
 	//PLAYLISTS

@@ -9,9 +9,8 @@ private:
 	int visibleRows;
 	int topRowIndex;
 	int currentRowIndex;
-	int currentSongId;
 public:
-	Library() : visibleRows(17), topRowIndex(17), currentRowIndex(1) {
+	Library() : visibleRows(17), topRowIndex(0), currentRowIndex(0) {
 
 	}
 
@@ -19,17 +18,35 @@ public:
 	int getVisibleRows() { return visibleRows; }
 	int getTopRowIndex() { return topRowIndex; }
 	int getCurrentRowIndex() { return currentRowIndex; }
+	int getCurrentSongId() { return songOrder[currentRowIndex + topRowIndex]; }
 
 	void setVisibleRows(int row) { visibleRows = row; }
 	void setTopRowIndex(int row) { topRowIndex = row; }
 	void setCurrentRowIndex(int row) { currentRowIndex = row; }
 
-	Song& getSongById(int idSong) {
-		return allSongs.getElement(idSong);
+	void moveCursor(int delta) {
+		int count = getCount();
+		if (count <= 0) return;
+
+		int abs = topRowIndex + currentRowIndex + delta;
+		if (abs < 0) abs = 0;
+		if (abs >= count) abs = count - 1;
+
+		if (abs < topRowIndex) {
+			topRowIndex = abs;
+			currentRowIndex = 0;
+		}
+		else if (abs >= topRowIndex + visibleRows) {
+			topRowIndex = abs - visibleRows + 1;
+			currentRowIndex = visibleRows - 1;
+		}
+		else {
+			currentRowIndex = abs - topRowIndex;
+		}
 	}
 
-	int getCurrentSongId() {
-		return currentSongId;
+	Song& getSongById(int idSong) {
+		return allSongs.getElement(idSong);
 	}
 
 	void buildIndex() {
@@ -38,6 +55,10 @@ public:
 			songOrder.push_back(it.getKey());
 		}
 	}
+
+	std::vector<int>& getSongOrder() { return songOrder; }
+
 	int getCount() const { return (int)songOrder.size(); }
 	int getIdAtRow(int row) const { return songOrder[row - 1]; }
+
 };
