@@ -23,7 +23,15 @@ public:
 	bool load(const std::string& sourcePath) {
 		if (deviceOpen) close();
 
-		std::string command = "open \"" + sourcePath + "\" type mpegvideo alias " + deviceAlias;
+		std::string command = "open \"" + sourcePath + "\"";
+		if (sourcePath.size() >= 4) {
+			std::string ext = sourcePath.substr(sourcePath.size() - 4);
+			for (auto& c : ext) c = (char)tolower(c);
+			if (ext == ".wav") command += " type waveaudio";
+			else if (ext == ".mp3") command += " type mpegvideo";
+		}
+		command += " alias " + deviceAlias;
+
 		if (sendCommand(command) != 0) return false;
 
 		std::string timeFormat = "set " + deviceAlias + " time format milliseconds";
