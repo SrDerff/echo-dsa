@@ -27,7 +27,11 @@ public:
 		buildViewData();
 	}
 	~EchoService() {
-
+		viewData.player.songName = "No song playing";
+		viewData.player.artist = "No artist";
+		viewData.player.state = playerState;
+		viewData.player.length = 0.0f;
+		viewData.player.position = 0.0f;
 	}
 
 	//GENERAL
@@ -44,13 +48,8 @@ public:
 		FileManager::saveGeneralData(library.getAllSongs(), albums);
 	}
 
-	void savePersonalService() {
-		FileManager::savePersonalData(currAccount);
-	}
-
 	void unloadAccountService() {
 		FileManager::savePersonalData(currAccount);
-		currAccount = Account();
 	}
 
 	Song& getSongById(int index) {
@@ -70,6 +69,20 @@ public:
 	void stopSong() {
 		if (soundAPI.stop()) { }
 		else std::cout << "error";
+	}
+
+	void resumeSong() {
+		if (soundAPI.resume()) { }
+		else std::cout << "error";
+	}
+
+	void pauseSong() {
+		if (soundAPI.pause()) { }
+		else std::cout << "error";
+	}
+
+	int getIdAtRow(int row) {
+		return library.getIdAtRow(row);
 	}
 
 	void quit() {
@@ -140,19 +153,13 @@ public:
 
 		viewData.selectedIndex = library.getTopRowIndex() + library.getCurrentRowIndex() + 1;
 		viewData.topRowIndex = library.getTopRowIndex() + 1;
-
-		//test
-		PlayerData _playerData;
-		_playerData.songName = "No song playing";
-		_playerData.artist = "No artist";
-		_playerData.state = playerState;
-		_playerData.length = 0.0f;
-		_playerData.position = 0.0f;
-
-		viewData.player = _playerData;
 	}
 
-	const ViewData& getViewData() {
+	void updatePlayerData(const PlayerData& playerData) {
+		viewData.player = playerData;
+	}
+
+	ViewData& getViewData() {
 		return viewData;
 	}
 

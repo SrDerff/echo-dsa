@@ -239,6 +239,19 @@ private:
 		paint(190, 4, "Single", DIM_R, DIM_G, DIM_B, BG_R, BG_G, BG_B);
 	}
 
+public:
+	void updateHud(const ViewData& data) {
+
+		fillRect(80, 3, 40, 2, ' ', BG_R, BG_G, BG_B, BG_R, BG_G, BG_B);
+		const std::string name = data.player.songName;
+		const std::string artist = data.player.artist;
+		int nameX = (std::max)(4, 98 - visWidth(name) / 2);
+		int artistX = (std::max)(4, 98 - visWidth(artist) / 2);
+		paint(nameX, 3, fit(name, 60), TITLE_R, TITLE_G, TITLE_B, BG_R, BG_G, BG_B);
+		if (!artist.empty()) paint(artistX, 4, fit(artist, 60), SOFT_R, SOFT_G, SOFT_B, BG_R, BG_G, BG_B);
+	}
+
+private:
 	// ==== barra de tabs ====
 	struct TabInfo {
 		Tab tab;

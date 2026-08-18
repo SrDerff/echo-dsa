@@ -15,7 +15,6 @@ private:
 	int welcomeIndex = 0;
 public:
 	AppController() {
-		echoService.loadGeneralService();
 		ui.init();
 		ui.renderWelcome(welcomeIndex);
 	}
@@ -34,14 +33,9 @@ public:
 				break;
 			case Screen::MAIN:
 				if (!mainRun()) {
-					echoService.logout();
-					echoService.saveGeneralService();
-					echoService.savePersonalService();
 					screen = Screen::WELCOME;
 					ui.renderWelcome(0);
 					welcomeIndex = 0;
-					
-
 				}
 				break;
 			}
@@ -64,14 +58,14 @@ private:
 				case 1: screen = Screen::REGISTER; break;
 				case 2: { // salir
 					echoService.saveGeneralService();
-					echoService.savePersonalService();
+					echoService.loadAccountService();
 					return false;
 				}                
 				}
 			}
 			else if (key == 27) { // Esc
 				echoService.saveGeneralService();
-				echoService.savePersonalService();
+				echoService.unloadAccountService();
 				return false;
 			}
 			else if (key == 72 && welcomeIndex > 0) {  // flecha arriba
@@ -91,46 +85,92 @@ private:
 	bool mainRun() {
 		while (screen == Screen::MAIN) {
 			int key = readKey();
-			if (key == 27) {                          // Esc: salir guardando la cuenta
-				echoService.stopSong();
-				echoService.unloadAccountService();
-				return false;
-			}
-			if (key == 13) {                          // Enter: reproducir cancion
-				if (echoService.getActiveTab() == Tab::LIBRARY) {
-					echoService.playSong(echoService.getCurrentSongId());
-				}
-			}
-			if (key == 72) { // flecha arriba
-				int oldAbs = echoService.getTopRowIndex() + echoService.getCurrentRowIndex();
-				int oldTop = echoService.getTopRowIndex();
-				echoService.moveSelection(-1);
-				const ViewData& vd = echoService.getViewData();
-				if (echoService.getTopRowIndex() != oldTop) {
-					ui.updateRows(vd);
-				}
-				else {
-					ui.updateRow(vd, oldAbs + 1);
-					ui.updateRow(vd, echoService.getTopRowIndex() + echoService.getCurrentRowIndex() + 1);
-				}
-			}
-			if (key == 80) { // flecha abajo
-				int oldAbs = echoService.getTopRowIndex() + echoService.getCurrentRowIndex();
-				int oldTop = echoService.getTopRowIndex();
-				echoService.moveSelection(1);
-				const ViewData& vd = echoService.getViewData();
-				if (echoService.getTopRowIndex() != oldTop) {
-					ui.updateRows(vd);
-				}
-				else {
-					ui.updateRow(vd, oldAbs + 1);
-					ui.updateRow(vd, echoService.getTopRowIndex() + echoService.getCurrentRowIndex() + 1);
-				}
-			}
-			if (key == 32) {
-				echoService.stopSong();
+			switch (echoService.getActiveTab()) {
+				case Tab::LIBRARY:
+					return mainLibraryRun(key);
+					break;
+				case Tab::PLAYLISTS:
+					// Implement playlist handling here
+					break;
+				case Tab::LIKES:
+					// Implement likes handling here
+					break;
+				case Tab::RECOMMENDED:
+					// Implement recommended handling here
+					break;
+				case Tab::HISTORIAL:
+					// Implement historial handling here
+					break;
+				case Tab::SEARCH:
+					// Implement search handling here
+					break;
 			}
 		}
+		return true;
+	}
+
+	bool mainLibraryRun(int key) {
+		if (key == 27) {                          // Esc: salir guardando la cuenta
+			echoService.stopSong();
+			echoService.unloadAccountService();
+			echoService.saveGeneralService();
+			echoService.logout();
+			return false;
+		}
+		if (key == 13) {                          // Enter: reproducir cancion
+			echoService.playSong(echoService.getCurrentSongId());
+			echoService.updatePlayerData(
+				PlayerData{
+					echoService.getSongById(echoService.getCurrentSongId()).getName(),
+					echoService.getSongById(echoService.getCurrentSongId()).getAuthor(),
+					PlayerState::PLAYING,
+					echoService.getSongById(echoService.getCurrentSongId()).getLength(),
+					0.0f
+				}
+			);
+			ui.updateHud(echoService.getViewData());
+		}
+		if (key == 72) { // flecha arriba
+			int oldAbs = echoService.getTopRowIndex() + echoService.getCurrentRowIndex();
+			int oldTop = echoService.getTopRowIndex();
+			echoService.moveSelection(-1);
+			const ViewData& vd = echoService.getViewData();
+			if (echoService.getTopRowIndex() != oldTop) {
+				ui.updateRows(vd);
+			}
+			else {
+				ui.updateRow(vd, oldAbs + 1);
+				ui.updateRow(vd, echoService.getTopRowIndex() + echoService.getCurrentRowIndex() + 1);
+			}
+		}
+		if (key == 80) { // flecha abajo
+			int oldAbs = echoService.getTopRowIndex() + echoService.getCurrentRowIndex();
+			int oldTop = echoService.getTopRowIndex();
+			echoService.moveSelection(1);
+			const ViewData& vd = echoService.getViewData();
+			if (echoService.getTopRowIndex() != oldTop) {
+				ui.updateRows(vd);
+			}
+			else {
+				ui.updateRow(vd, oldAbs + 1);
+				ui.updateRow(vd, echoService.getTopRowIndex() + echoService.getCurrentRowIndex() + 1);
+			}
+		}
+		if (key == 32) { // barra espaciadora: pausar/reanudar
+			if(echoService.getViewData().player.state == PlayerState::PLAYING
+				&& echoService.getViewData().player.songName == echoService.getSongById(echoService.getCurrentSongId()).getName()
+				) {
+				echoService.pauseSong();
+				echoService.getViewData().player.state = PlayerState::PAUSED;
+			}
+			else if(echoService.getViewData().player.state == PlayerState::PAUSED
+				&& echoService.getViewData().player.songName == echoService.getSongById(echoService.getCurrentSongId()).getName()
+				) {
+				echoService.resumeSong();
+				echoService.getViewData().player.state = PlayerState::PLAYING;
+			}
+		}
+
 		return true;
 	}
 

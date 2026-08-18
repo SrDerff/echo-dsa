@@ -7,7 +7,8 @@
         "songsIds": [
             1018
         ]
-    },
+    }
+,
     {
         "author": "Ariana Grande",
         "id": 2,
@@ -16,7 +17,8 @@
         "songsIds": [
             1055
         ]
-    },
+    }
+,
     {
         "author": "Avicii",
         "id": 3,
@@ -26,7 +28,8 @@
             1031,
             1059
         ]
-    },
+    }
+,
     {
         "author": "Bad Bunny",
         "id": 4,
@@ -37,7 +40,8 @@
             1016,
             1056
         ]
-    },
+    }
+,
     {
         "author": "Beach House",
         "id": 5,
@@ -46,7 +50,8 @@
         "songsIds": [
             1049
         ]
-    },
+    }
+,
     {
         "author": "Billie Eilish",
         "id": 6,
@@ -55,7 +60,8 @@
         "songsIds": [
             1005
         ]
-    },
+    }
+,
     {
         "author": "Calvin Harris",
         "id": 7,
@@ -65,7 +71,8 @@
             1040,
             1052
         ]
-    },
+    }
+,
     {
         "author": "Cigarettes After Sex",
         "id": 8,
@@ -75,7 +82,8 @@
             1003,
             1038
         ]
-    },
+    }
+,
     {
         "author": "Clairo",
         "id": 9,
@@ -85,7 +93,8 @@
             1041,
             1048
         ]
-    },
+    }
+,
     {
         "author": "Daft Punk",
         "id": 10,
@@ -95,7 +104,8 @@
             1023,
             1039
         ]
-    },
+    }
+,
     {
         "author": "Drake",
         "id": 11,
@@ -104,7 +114,8 @@
         "songsIds": [
             1025
         ]
-    },
+    }
+,
     {
         "author": "Dua Lipa",
         "id": 12,
@@ -113,7 +124,8 @@
         "songsIds": [
             1032
         ]
-    },
+    }
+,
     {
         "author": "Ed Sheeran",
         "id": 13,
@@ -122,7 +134,8 @@
         "songsIds": [
             1045
         ]
-    },
+    }
+,
     {
         "author": "Eminem",
         "id": 14,
@@ -131,7 +144,8 @@
         "songsIds": [
             1033
         ]
-    },
+    }
+,
     {
         "author": "Eslabon Armado",
         "id": 15,
@@ -140,7 +154,8 @@
         "songsIds": [
             1020
         ]
-    },
+    }
+,
     {
         "author": "Feid",
         "id": 16,
@@ -150,7 +165,8 @@
             1021,
             1036
         ]
-    },
+    }
+,
     {
         "author": "Green Day",
         "id": 17,
@@ -159,7 +175,8 @@
         "songsIds": [
             1008
         ]
-    },
+    }
+,
     {
         "author": "Harry Styles",
         "id": 18,
@@ -168,7 +185,8 @@
         "songsIds": [
             1004
         ]
-    },
+    }
+,
     {
         "author": "J Balvin",
         "id": 19,
@@ -177,7 +195,8 @@
         "songsIds": [
             1029
         ]
-    },
+    }
+,
     {
         "author": "J. Cole",
         "id": 20,
@@ -186,7 +205,8 @@
         "songsIds": [
             1037
         ]
-    },
+    }
+,
     {
         "author": "Joji",
         "id": 21,
@@ -196,7 +216,8 @@
             1024,
             1047
         ]
-    },
+    }
+,
     {
         "author": "Juice WRLD",
         "id": 22,
@@ -205,7 +226,8 @@
         "songsIds": [
             1034
         ]
-    },
+    }
+,
     {
         "author": "Justin Timberlake",
         "id": 23,
@@ -214,7 +236,8 @@
         "songsIds": [
             1011
         ]
-    },
+    }
+,
     {
         "author": "Kanye West",
         "id": 24,
@@ -223,7 +246,8 @@
         "songsIds": [
             1050
         ]
-    },
+    }
+,
     {
         "author": "Karol G",
         "id": 25,
@@ -233,7 +257,8 @@
             1042,
             1057
         ]
-    },
+    }
+,
     {
         "author": "Katy Perry",
         "id": 26,
@@ -242,7 +267,8 @@
         "songsIds": [
             1022
         ]
-    },
+    }
+,
     {
         "author": "Kendrick Lamar",
         "id": 27,
@@ -253,7 +279,8 @@
             1017,
             1027
         ]
-    },
+    }
+,
     {
         "author": "Mac DeMarco",
         "id": 28,
@@ -262,7 +289,8 @@
         "songsIds": [
             1012
         ]
-    },
+    }
+,
     {
         "author": "Mark Ronson",
         "id": 29,
@@ -271,7 +299,8 @@
         "songsIds": [
             1058
         ]
-    },
+    }
+,
     {
         "author": "Martin Garrix",
         "id": 30,
@@ -281,7 +310,8 @@
             1002,
             1043
         ]
-    },
+    }
+,
     {
         "author": "Nio Garcia",
         "id": 31,
@@ -290,7 +320,8 @@
         "songsIds": [
             1001
         ]
-    },
+    }
+,
     {
         "author": "Nirvana",
         "id": 32,
@@ -300,7 +331,8 @@
             1014,
             1054
         ]
-    },
+    }
+,
     {
         "author": "Radiohead",
         "id": 33,
@@ -310,7 +342,8 @@
             1015,
             1028
         ]
-    },
+    }
+,
     {
         "author": "Red Hot Chili Peppers",
         "id": 34,
@@ -319,7 +352,8 @@
         "songsIds": [
             1009
         ]
-    },
+    }
+,
     {
         "author": "Rex Orange County",
         "id": 35,
@@ -329,7 +363,8 @@
             1006,
             1053
         ]
-    },
+    }
+,
     {
         "author": "Swedish House Mafia",
         "id": 36,
@@ -338,7 +373,8 @@
         "songsIds": [
             1019
         ]
-    },
+    }
+,
     {
         "author": "Taylor Swift",
         "id": 37,
@@ -347,7 +383,8 @@
         "songsIds": [
             1051
         ]
-    },
+    }
+,
     {
         "author": "The Chainsmokers",
         "id": 38,
@@ -356,7 +393,8 @@
         "songsIds": [
             1013
         ]
-    },
+    }
+,
     {
         "author": "The Killers",
         "id": 39,
@@ -365,7 +403,8 @@
         "songsIds": [
             1035
         ]
-    },
+    }
+,
     {
         "author": "The Strokes",
         "id": 40,
@@ -374,7 +413,8 @@
         "songsIds": [
             1030
         ]
-    },
+    }
+,
     {
         "author": "The Weeknd",
         "id": 41,
@@ -383,7 +423,8 @@
         "songsIds": [
             1007
         ]
-    },
+    }
+,
     {
         "author": "The White Stripes",
         "id": 42,
@@ -392,7 +433,8 @@
         "songsIds": [
             1044
         ]
-    },
+    }
+,
     {
         "author": "Travis Scott",
         "id": 43,
