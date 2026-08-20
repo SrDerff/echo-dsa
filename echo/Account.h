@@ -18,12 +18,29 @@ private:
 	std::vector<Playlist> playlists;
 	Set<int>idsLikedSongs;
 	Set<int>idsDislikedSongs;
+
+	bool plsOpen;
+
+	int currentRowIndexPlaylist;
+	int topRowIndexPlaylist;
+	int visibleRowsPlaylist;
+
+	int currentRowIndexLikes;
+	int topRowIndexLikes;
+	int visibleRowsLikes;
 public:
 	Account() {
 		idAccount = -1;
 		username = "null";
 		passwordHash = "null";
 		vip = false;
+		plsOpen = false;
+		currentRowIndexPlaylist = 0;
+		topRowIndexPlaylist = 0;
+		visibleRowsPlaylist = 0;
+		currentRowIndexLikes = 0;
+		topRowIndexLikes = 0;
+		visibleRowsLikes = 0;
 	}
 	
 	Account(int _id, std::string _user, std::string _password, bool _vip) {
@@ -31,17 +48,35 @@ public:
 		username = _user;
 		passwordHash = _password;
 		vip = _vip;
+		plsOpen = false;
+		currentRowIndexPlaylist = 0;
+		topRowIndexPlaylist = 0;
+		visibleRowsPlaylist = 0;
+		currentRowIndexLikes = 0;
+		topRowIndexLikes = 0;
+		visibleRowsLikes = 0;
 	}
 	
 	int getIdAccount() { return idAccount; }
 	std::string getUsername() { return username; }
 	std::string getPasswordHash() { return passwordHash; }
 	bool isVip() { return vip; }
+	bool isPlaylistOpen() { return plsOpen; }
+
+	int getCurrentRowIndexPlaylist() const { return currentRowIndexPlaylist; }
+	int getTopRowIndexPlaylist() const { return topRowIndexPlaylist; }
+	int getVisibleRowsPlaylist() const { return visibleRowsPlaylist; }
+
+	int getCurrentRowIndexLikes() const { return currentRowIndexLikes; }
+	int getTopRowIndexLikes() const { return topRowIndexLikes; }
+	int getVisibleRowsLikes() const { return visibleRowsLikes; }
+
 
 	void setIdAccount(int _id) { idAccount = _id; }
 	void setUsername(std::string _user) { username = _user; }
 	void setPasswordHash(std::string _password) { passwordHash = _password; }
 	void setVip(bool _vip) { vip = _vip; }
+	void setPlaylistOpen(bool _open) { plsOpen = _open; }
 
 	std::vector<Playlist>& getPlaylists() { return playlists; }
 	Set<int>& getLikedSongs() { return idsLikedSongs; }

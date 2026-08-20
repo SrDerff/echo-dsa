@@ -170,6 +170,15 @@ private:
 				echoService.getViewData().player.state = PlayerState::PLAYING;
 			}
 		}
+		if (key == 75) { // flecha izquierda: cambiar tab -> SEARCH ENGINE
+			echoService.setActiveTab(Tab::SEARCH);
+			
+		}
+
+		if (key == 77) { // flecha derecha: avanzar 5 segundos -> PLAYLISTS
+			echoService.setActiveTab(Tab::PLAYLISTS);
+			ui.updateRows(echoService.getViewData());
+		}
 
 		return true;
 	}

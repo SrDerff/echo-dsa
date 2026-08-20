@@ -60,6 +60,11 @@ public:
 		return activeTab;
 	}
 
+	void setActiveTab(const Tab& tab) {
+		activeTab = tab;
+		buildViewData();
+	}	
+
 	void playSong(int idSong) {
 		if (soundAPI.load(getSongById(idSong).getSourcePath())) { }
 		else std::cout << "error";   
@@ -131,28 +136,92 @@ public:
 		viewData.rows.clear();
 		std::vector<RowData> _rows;
 		if (activeTab == Tab::LIBRARY) {
-			std::vector<int> songOrder = library.getSongOrder();
-			library.buildIndex();
-			for (size_t i = 0; i < songOrder.size();i++) {
-				Song& song = library.getSongById(songOrder[i]);
-				RowData row;
-				row.title = song.getName();
-				row.artist = song.getAuthor();
-				row.genre = song.getGenre();
-				row.likes = song.getLikesCount();
-				row.isLiked = currAccount.getLikedSongs().contains(song.getIdSong());
-				row.duration = song.getLength();
-				row.isPlaying = (song.getIdSong() == library.getCurrentSongId());
-				row.isPlaylist = false;
-				row.playlistSize = -1;
-
-				_rows.push_back(row);
-			}
+			buildLibraryView(_rows);
+		}
+		else if(activeTab == Tab::PLAYLISTS) {
+			buildPlaylistViewGeneral(_rows);
+		}
+		else if(activeTab == Tab::LIKES) {
+			buildLikesView(_rows);
+		}
+		else if(activeTab == Tab::RECOMMENDED) {
+		
+		}
+		else if(activeTab == Tab::HISTORIAL) {
+		
+		}
+		else if(activeTab == Tab::SEARCH) {
+		
 		}
 		viewData.rows = _rows;
+	}
+
+	void buildLibraryView(std::vector<RowData>& _rows) {
+		std::vector<int> songOrder = library.getSongOrder();
+		library.buildIndex();
+		for (size_t i = 0; i < songOrder.size(); i++) {
+			Song& song = library.getSongById(songOrder[i]);
+			RowData row;
+			row.title = song.getName();
+			row.artist = song.getAuthor();
+			row.genre = song.getGenre();
+			row.likes = song.getLikesCount();
+			row.isLiked = currAccount.getLikedSongs().contains(song.getIdSong());
+			row.duration = song.getLength();
+			row.isPlaying = (song.getIdSong() == library.getCurrentSongId());
+			row.isPlaylist = false;
+			row.playlistSize = -1;
+
+			_rows.push_back(row);
+		}
 
 		viewData.selectedIndex = library.getTopRowIndex() + library.getCurrentRowIndex() + 1;
 		viewData.topRowIndex = library.getTopRowIndex() + 1;
+	}
+
+	void buildPlaylistViewGeneral(std::vector<RowData>& _rows) {
+		if (currAccount.isPlaylistOpen()) {
+			buildPlaylistViewOpen(_rows);
+			return;
+		}
+
+		for (Playlist& pl : currAccount.getPlaylists()) {
+			RowData row;
+			row.title = pl.getName();
+			row.artist = "Playlist";
+			row.genre = "Playlist";
+			row.likes = -1;
+			row.isLiked = false;
+			row.duration = -1.0f;
+			row.isPlaying = false;
+			row.isPlaylist = true;
+			row.playlistSize = pl.getCount();
+			_rows.push_back(row);
+		}
+
+		viewData.selectedIndex = currAccount.getCurrentRowIndexLikes() + currAccount.getTopRowIndexLikes() + 1;
+		viewData.topRowIndex = currAccount.getTopRowIndexLikes() + 1;
+	}
+
+	void buildPlaylistViewOpen(std::vector<RowData>& _rows) {
+		for (int idSong : currAccount.getPlaylists()[currAccount.getCurrentRowIndexPlaylist()+currAccount.getTopRowIndexLikes()].getSongsIds()) {
+			Song& song = library.getSongById(idSong);
+			RowData row;
+			row.title = song.getName();
+			row.artist = song.getAuthor();
+			row.genre = song.getGenre();
+			row.likes = song.getLikesCount();
+			row.isLiked = currAccount.getLikedSongs().contains(song.getIdSong());
+			row.duration = song.getLength();
+			row.isPlaying = (song.getIdSong() == library.getCurrentSongId());
+			row.isPlaylist = false;
+			row.playlistSize = -1;
+			_rows.push_back(row);
+		}
+	}
+
+	void buildLikesView(std::vector<RowData>& _rows) {
+	
 	}
 
 	void updatePlayerData(const PlayerData& playerData) {

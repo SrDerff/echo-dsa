@@ -25,6 +25,7 @@ public:
 	int getTopRowIndex() { return topRowIndex; }
 	int getCurrentRowIndex() { return currentRowIndex; }
 	int getCurrentSongId() { return currentSongId; }
+	int getCount() { return songsIds.getSize(); }
 
 	LinkedList<int>& getSongsIds() { return songsIds; }
 
