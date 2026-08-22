@@ -94,6 +94,11 @@ public:
 
 	}
 
+	//ACCOUNT
+	Account& getCurrentAccount() {
+		return currAccount;
+	}
+
 	//SESSION
 
 	bool login(const std::string& user, const std::string& pass) {
@@ -132,7 +137,8 @@ public:
 	void buildViewData() {
 		viewData.activeTab = activeTab;
 		viewData.username = currAccount.getUsername();
-		
+		viewData.playlistOpen = (activeTab == Tab::PLAYLISTS && currAccount.isPlaylistOpen());
+
 		viewData.rows.clear();
 		std::vector<RowData> _rows;
 		if (activeTab == Tab::LIBRARY) {
@@ -199,12 +205,15 @@ public:
 			_rows.push_back(row);
 		}
 
-		viewData.selectedIndex = currAccount.getCurrentRowIndexLikes() + currAccount.getTopRowIndexLikes() + 1;
-		viewData.topRowIndex = currAccount.getTopRowIndexLikes() + 1;
+		viewData.selectedIndex = currAccount.getCurrentRowIndexPlaylist() + currAccount.getTopRowIndexPlaylist() + 1;
+		viewData.topRowIndex = currAccount.getTopRowIndexPlaylist() + 1;
 	}
 
 	void buildPlaylistViewOpen(std::vector<RowData>& _rows) {
-		for (int idSong : currAccount.getPlaylists()[currAccount.getCurrentRowIndexPlaylist()+currAccount.getTopRowIndexLikes()].getSongsIds()) {
+		Playlist* pl = getOpenPlaylist();
+		if (!pl) return;
+
+		for (int idSong : pl->getSongsIds()) {
 			Song& song = library.getSongById(idSong);
 			RowData row;
 			row.title = song.getName();
@@ -218,6 +227,9 @@ public:
 			row.playlistSize = -1;
 			_rows.push_back(row);
 		}
+
+		viewData.selectedIndex = pl->getCurrentRowIndex() + pl->getTopRowIndex() + 1;
+		viewData.topRowIndex = pl->getTopRowIndex() + 1;
 	}
 
 	void buildLikesView(std::vector<RowData>& _rows) {
@@ -250,11 +262,47 @@ public:
 		return currAccount.removeDislikeSong(idSong);
 	}
 
-	//LIBRARY
-	int getVisibleRows() { return library.getVisibleRows(); }
-	int getTopRowIndex() { return library.getTopRowIndex(); }
-	int getCurrentRowIndex() { return library.getCurrentRowIndex(); }
-	int getCurrentSongId() { return library.getCurrentSongId(); }
+	//INDEXS
+	int getVisibleRows() { 
+		if (activeTab == Tab::LIBRARY) {
+			return library.getVisibleRows(); 
+		}
+		if (activeTab == Tab::PLAYLISTS) {
+			Playlist* pl = getOpenPlaylist();
+			if (pl) return pl->getVisibleRows();
+			return currAccount.getVisibleRowsPlaylist();
+		}
+		return 0;
+	}
+
+	int getTopRowIndex() {
+		if(activeTab == Tab::LIBRARY) {
+			return library.getTopRowIndex();
+		}
+		if(activeTab == Tab::PLAYLISTS) {
+			Playlist* pl = getOpenPlaylist();
+			if (pl) return pl->getTopRowIndex();
+			return currAccount.getTopRowIndexPlaylist();
+		}
+		return 0;
+	}
+
+	int getCurrentRowIndex() {
+		if(activeTab == Tab::LIBRARY) {
+			return library.getCurrentRowIndex();
+		}
+		if(activeTab == Tab::PLAYLISTS) {
+			Playlist* pl = getOpenPlaylist();
+			if (pl) return pl->getCurrentRowIndex();
+			return currAccount.getCurrentRowIndexPlaylist();
+		}
+		return 0;
+	}
+
+	int getCurrentSongId() { 
+		return library.getCurrentSongId(); 
+	
+	}
 
 	void setVisibleRows(int rows) { library.setVisibleRows(rows); }
 	void setTopRowIndex(int row) { library.setTopRowIndex(row); }
@@ -262,8 +310,23 @@ public:
 
 	int getLibrarySize() const { return library.getCount(); }
 
+	Playlist* getOpenPlaylist() {
+		if (!currAccount.isPlaylistOpen()) return nullptr;
+		int idx = currAccount.getIndexOpenPlaylist();
+		if (idx < 0 || idx >= (int)currAccount.getPlaylists().size()) return nullptr;
+		return &currAccount.getPlaylists()[idx];
+	}
+
 	void moveSelection(int delta) {
-		library.moveCursor(delta);
+		if (activeTab == Tab::LIBRARY) {
+			library.moveCursor(delta);
+		}
+		else if (activeTab == Tab::PLAYLISTS && !currAccount.isPlaylistOpen()) {
+			currAccount.movePlaylistCursor(delta);
+		}
+		else if (Playlist* pl = getOpenPlaylist()) {
+			pl->moveSongCursor(delta);
+		}
 		buildViewData();
 	}
 
@@ -285,12 +348,19 @@ public:
 		return currAccount.removePlaylist(plName);
 	}
 
-	void openPlaylist(std::string plName) {
-
+	bool openPlaylistAt(int index) {
+		int count = (int)currAccount.getPlaylists().size();
+		if (index < 0 || index >= count) return false;
+		currAccount.setPlaylistOpen(true);
+		currAccount.setIndexOpenPlaylist(index);
+		buildViewData();
+		return true;
 	}
 
 	void closePlaylist() {
-	
+		currAccount.setPlaylistOpen(false);
+		currAccount.setIndexOpenPlaylist(-1);
+		buildViewData();
 	}
 
 	//ALBUMS

@@ -45,6 +45,7 @@ struct ViewData {
 	std::vector<RowData> rows;
 	int selectedIndex;
 	int topRowIndex;
+	bool playlistOpen;   // en tab PLAYLISTS: hay una playlist abierta mostrando canciones
 	PlayerData player;
 };
 
@@ -183,10 +184,10 @@ private:
 		return def;
 	}
 
-	static const char* emptyMessage(Tab t) {
-		switch (t) {
+	static const char* emptyMessage(const ViewData& d) {
+		switch (d.activeTab) {
 		case Tab::LIBRARY: return "No hay canciones cargadas en la biblioteca.";
-		case Tab::PLAYLISTS: return "No hay playlists creadas.";
+		case Tab::PLAYLISTS: return d.playlistOpen ? "La playlist esta vacia." : "No hay playlists creadas.";
 		case Tab::LIKES: return "Marca canciones con L para verlas aqui.";
 		case Tab::RECOMMENDED: return "Marca canciones con L para generar recomendaciones.";
 		case Tab::HISTORIAL: return "El historial esta vacio.";
@@ -196,7 +197,9 @@ private:
 
 	static std::string thirdValue(const RowData& rd, Tab t) {
 		switch (t) {
-		case Tab::PLAYLISTS: return std::to_string((std::max)(0LL, rd.playlistSize));
+		case Tab::PLAYLISTS:
+			if (rd.isPlaylist) return std::to_string((std::max)(0LL, rd.playlistSize));
+			return fmtTime(rd.duration); // canciones dentro de una playlist abierta
 		case Tab::RECOMMENDED: return std::to_string(rd.likes);
 		default: return fmtTime(rd.duration);
 		}
@@ -251,6 +254,21 @@ public:
 		if (!artist.empty()) paint(artistX, 4, fit(artist, 60), SOFT_R, SOFT_G, SOFT_B, BG_R, BG_G, BG_B);
 	}
 
+	void updateTabsBar(const ViewData& data) {
+		ensureInit();
+		drawTabsBar(data);
+		std::cout << std::flush;
+	}
+
+	void updateTableHeader(const ViewData& data) {
+		ensureInit();
+		fillRect(4, 14, 36, 1, ' ', BG_R, BG_G, BG_B, BG_R, BG_G, BG_B);
+		fillRect(41, 14, 70, 1, ' ', BG_R, BG_G, BG_B, BG_R, BG_G, BG_B);
+		fillRect(112, 14, 8, 1, ' ', BG_R, BG_G, BG_B, BG_R, BG_G, BG_B);
+		drawTableHeader(data);
+		std::cout << std::flush;
+	}
+
 private:
 	// ==== barra de tabs ====
 	struct TabInfo {
@@ -290,7 +308,7 @@ private:
 
 	// ==== tabla central ====
 	static void drawTableHeader(const ViewData& data) {
-		bool pl = (data.activeTab == Tab::PLAYLISTS);
+		bool pl = (data.activeTab == Tab::PLAYLISTS && !data.playlistOpen);
 		bool rec = (data.activeTab == Tab::RECOMMENDED);
 		std::string c1 = colLabel(data, 1, pl ? "User" : "Artist");
 		std::string c2 = colLabel(data, 2, "Title");
@@ -309,7 +327,7 @@ private:
 			return;
 		}
 
-		bool pl = (data.activeTab == Tab::PLAYLISTS);
+		bool pl = (data.activeTab == Tab::PLAYLISTS && !data.playlistOpen);
 		const RowData& rd = data.rows[row - 1];
 		bool sel = (row == data.selectedIndex);
 		int r = sel ? SELECT_R : BG_R;
@@ -338,7 +356,7 @@ private:
 	static void drawRows(const ViewData& data) {
 		int count = (int)data.rows.size();
 		if (count == 0) {
-			paint(4, 17, emptyMessage(data.activeTab), DIM_R, DIM_G, DIM_B, BG_R, BG_G, BG_B);
+			paint(4, 17, emptyMessage(data), DIM_R, DIM_G, DIM_B, BG_R, BG_G, BG_B);
 			return;
 		}
 
@@ -656,7 +674,7 @@ public:
 		drawRows(data);
 		vLine(121, 13, 38, G_V, PANEL_R, PANEL_G, PANEL_B, BG_R, BG_G, BG_B);
 
-		if (data.activeTab != Tab::PLAYLISTS) drawRightPanel();
+		if (data.activeTab != Tab::PLAYLISTS || data.playlistOpen) drawRightPanel();
 
 		drawConsole();
 		drawHelp();
@@ -703,8 +721,16 @@ public:
 
 	void updateRows(const ViewData& data) {
 		ensureInit();
-		for (int i = 0; i < VISIBLE_ROWS; i++) {
-			drawRowAt(data, data.topRowIndex + i);
+		if (data.rows.empty()) {
+			for (int i = 0; i < VISIBLE_ROWS; i++) {
+				drawRowAt(data, data.topRowIndex + i);
+			}
+			paint(4, 17, emptyMessage(data), DIM_R, DIM_G, DIM_B, BG_R, BG_G, BG_B);
+		}
+		else {
+			for (int i = 0; i < VISIBLE_ROWS; i++) {
+				drawRowAt(data, data.topRowIndex + i);
+			}
 		}
 		std::cout << std::flush;
 	}

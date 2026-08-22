@@ -20,6 +20,7 @@ private:
 	Set<int>idsDislikedSongs;
 
 	bool plsOpen;
+	int indexOpenPlaylist;
 
 	int currentRowIndexPlaylist;
 	int topRowIndexPlaylist;
@@ -35,9 +36,10 @@ public:
 		passwordHash = "null";
 		vip = false;
 		plsOpen = false;
+		indexOpenPlaylist = -1;
 		currentRowIndexPlaylist = 0;
 		topRowIndexPlaylist = 0;
-		visibleRowsPlaylist = 0;
+		visibleRowsPlaylist = 17;
 		currentRowIndexLikes = 0;
 		topRowIndexLikes = 0;
 		visibleRowsLikes = 0;
@@ -49,9 +51,10 @@ public:
 		passwordHash = _password;
 		vip = _vip;
 		plsOpen = false;
+		indexOpenPlaylist = -1;
 		currentRowIndexPlaylist = 0;
 		topRowIndexPlaylist = 0;
-		visibleRowsPlaylist = 0;
+		visibleRowsPlaylist = 17;
 		currentRowIndexLikes = 0;
 		topRowIndexLikes = 0;
 		visibleRowsLikes = 0;
@@ -62,6 +65,7 @@ public:
 	std::string getPasswordHash() { return passwordHash; }
 	bool isVip() { return vip; }
 	bool isPlaylistOpen() { return plsOpen; }
+	int getIndexOpenPlaylist() const { return indexOpenPlaylist; }
 
 	int getCurrentRowIndexPlaylist() const { return currentRowIndexPlaylist; }
 	int getTopRowIndexPlaylist() const { return topRowIndexPlaylist; }
@@ -77,6 +81,32 @@ public:
 	void setPasswordHash(std::string _password) { passwordHash = _password; }
 	void setVip(bool _vip) { vip = _vip; }
 	void setPlaylistOpen(bool _open) { plsOpen = _open; }
+	void setIndexOpenPlaylist(int _index) { indexOpenPlaylist = _index; }
+	void setVisibleRowsPlaylist(int rows) { visibleRowsPlaylist = rows; }
+	void setTopRowIndexPlaylist(int row) { topRowIndexPlaylist = row; }
+	void setCurrentRowIndexPlaylist(int row) { currentRowIndexPlaylist = row; }
+
+	// Misma semantica que Library::moveCursor (clamp + scroll de ventana).
+	void movePlaylistCursor(int delta) {
+		int count = (int)playlists.size();
+		if (count <= 0) return;
+
+		int abs = topRowIndexPlaylist + currentRowIndexPlaylist + delta;
+		if (abs < 0) abs = 0;
+		if (abs >= count) abs = count - 1;
+
+		if (abs < topRowIndexPlaylist) {
+			topRowIndexPlaylist = abs;
+			currentRowIndexPlaylist = 0;
+		}
+		else if (abs >= topRowIndexPlaylist + visibleRowsPlaylist) {
+			topRowIndexPlaylist = abs - visibleRowsPlaylist + 1;
+			currentRowIndexPlaylist = visibleRowsPlaylist - 1;
+		}
+		else {
+			currentRowIndexPlaylist = abs - topRowIndexPlaylist;
+		}
+	}
 
 	std::vector<Playlist>& getPlaylists() { return playlists; }
 	Set<int>& getLikedSongs() { return idsLikedSongs; }

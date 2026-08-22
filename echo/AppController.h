@@ -85,12 +85,14 @@ private:
 	bool mainRun() {
 		while (screen == Screen::MAIN) {
 			int key = readKey();
+			if (key == 75) { switchTab(-1); continue; } // flecha izquierda: tab anterior
+			if (key == 77) { switchTab(+1); continue; } // flecha derecha: tab siguiente
 			switch (echoService.getActiveTab()) {
 				case Tab::LIBRARY:
 					return mainLibraryRun(key);
 					break;
 				case Tab::PLAYLISTS:
-					// Implement playlist handling here
+					return mainPlaylistGeneralRun(key);
 					break;
 				case Tab::LIKES:
 					// Implement likes handling here
@@ -107,6 +109,31 @@ private:
 			}
 		}
 		return true;
+	}
+
+	void switchTab(int delta) {
+		const int count = 6;
+		int idx = ((int)echoService.getActiveTab() + delta + count) % count;
+		echoService.setActiveTab((Tab)idx);
+
+		const ViewData& vd = echoService.getViewData();
+		ui.updateTabsBar(vd);
+		ui.updateTableHeader(vd);
+		ui.updateRows(vd);
+	}
+
+	void moveListSelection(int delta) {
+		int oldAbs = echoService.getTopRowIndex() + echoService.getCurrentRowIndex();
+		int oldTop = echoService.getTopRowIndex();
+		echoService.moveSelection(delta);
+		const ViewData& vd = echoService.getViewData();
+		if (echoService.getTopRowIndex() != oldTop) {
+			ui.updateRows(vd);
+		}
+		else {
+			ui.updateRow(vd, oldAbs + 1);
+			ui.updateRow(vd, echoService.getTopRowIndex() + echoService.getCurrentRowIndex() + 1);
+		}
 	}
 
 	bool mainLibraryRun(int key) {
@@ -131,30 +158,10 @@ private:
 			ui.updateHud(echoService.getViewData());
 		}
 		if (key == 72) { // flecha arriba
-			int oldAbs = echoService.getTopRowIndex() + echoService.getCurrentRowIndex();
-			int oldTop = echoService.getTopRowIndex();
-			echoService.moveSelection(-1);
-			const ViewData& vd = echoService.getViewData();
-			if (echoService.getTopRowIndex() != oldTop) {
-				ui.updateRows(vd);
-			}
-			else {
-				ui.updateRow(vd, oldAbs + 1);
-				ui.updateRow(vd, echoService.getTopRowIndex() + echoService.getCurrentRowIndex() + 1);
-			}
+			moveListSelection(-1);
 		}
 		if (key == 80) { // flecha abajo
-			int oldAbs = echoService.getTopRowIndex() + echoService.getCurrentRowIndex();
-			int oldTop = echoService.getTopRowIndex();
-			echoService.moveSelection(1);
-			const ViewData& vd = echoService.getViewData();
-			if (echoService.getTopRowIndex() != oldTop) {
-				ui.updateRows(vd);
-			}
-			else {
-				ui.updateRow(vd, oldAbs + 1);
-				ui.updateRow(vd, echoService.getTopRowIndex() + echoService.getCurrentRowIndex() + 1);
-			}
+			moveListSelection(1);
 		}
 		if (key == 32) { // barra espaciadora: pausar/reanudar
 			if(echoService.getViewData().player.state == PlayerState::PLAYING
@@ -170,17 +177,35 @@ private:
 				echoService.getViewData().player.state = PlayerState::PLAYING;
 			}
 		}
-		if (key == 75) { // flecha izquierda: cambiar tab -> SEARCH ENGINE
-			echoService.setActiveTab(Tab::SEARCH);
-			
+		return true;
+	}
+
+	bool mainPlaylistGeneralRun(int key) {
+		if (echoService.getCurrentAccount().isPlaylistOpen()) {
+			return mainPlaylistOpenRun(key);
 		}
 
-		if (key == 77) { // flecha derecha: avanzar 5 segundos -> PLAYLISTS
-			echoService.setActiveTab(Tab::PLAYLISTS);
-			ui.updateRows(echoService.getViewData());
+		if(key==27) { // Esc: salir guardando la cuenta
+			echoService.stopSong();
+			echoService.unloadAccountService();
+			echoService.saveGeneralService();
+			echoService.logout();
+			return false;
+		}
+
+		if(key==72) { // flecha arriba
+			moveListSelection(-1);
+		}
+
+		if(key==80) { // flecha abajo
+			moveListSelection(1);
 		}
 
 		return true;
+	}
+
+	bool mainPlaylistOpenRun(int key) {
+		return false;
 	}
 
 	void authFlow(bool isRegister) {

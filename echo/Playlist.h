@@ -12,7 +12,7 @@ private:
 	int currentRowIndex;
 	int currentSongId;
 public:
-	Playlist(std::string _name) : idPlaylist(0), visibleRows(17), topRowIndex(17), currentRowIndex(1) {
+	Playlist(std::string _name) : idPlaylist(0), visibleRows(17), topRowIndex(0), currentRowIndex(0) {
 		name = _name;
 	}
 	~Playlist() {
@@ -34,6 +34,28 @@ public:
 	void setVisibleRows(int row) { visibleRows = row; }
 	void setTopRowIndex(int row) { topRowIndex = row; }
 	void setCurrentRowIndex(int row) { currentRowIndex = row; }
+
+	// Misma semantica que Library::moveCursor (clamp + scroll de ventana).
+	void moveSongCursor(int delta) {
+		int count = getCount();
+		if (count <= 0) return;
+
+		int abs = topRowIndex + currentRowIndex + delta;
+		if (abs < 0) abs = 0;
+		if (abs >= count) abs = count - 1;
+
+		if (abs < topRowIndex) {
+			topRowIndex = abs;
+			currentRowIndex = 0;
+		}
+		else if (abs >= topRowIndex + visibleRows) {
+			topRowIndex = abs - visibleRows + 1;
+			currentRowIndex = visibleRows - 1;
+		}
+		else {
+			currentRowIndex = abs - topRowIndex;
+		}
+	}
 
 	void addSong(int newSongId){
 		songsIds.pushBack(newSongId);
