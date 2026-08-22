@@ -18,7 +18,13 @@ public:
 	int getVisibleRows() { return visibleRows; }
 	int getTopRowIndex() { return topRowIndex; }
 	int getCurrentRowIndex() { return currentRowIndex; }
-	int getCurrentSongId() { return songOrder[currentRowIndex + topRowIndex]; }
+	int getCurrentSongId() {
+		if (songOrder.empty()) return -1;
+		int idx = currentRowIndex + topRowIndex;
+		if (idx < 0) idx = 0;
+		if (idx >= (int)songOrder.size()) idx = (int)songOrder.size() - 1;
+		return songOrder[idx];
+	}
 
 	void setVisibleRows(int row) { visibleRows = row; }
 	void setTopRowIndex(int row) { topRowIndex = row; }
@@ -47,6 +53,10 @@ public:
 
 	Song& getSongById(int idSong) {
 		return allSongs.getElement(idSong);
+	}
+
+	bool containsSong(int idSong) {
+		return allSongs.contains(idSong);
 	}
 
 	void buildIndex() {

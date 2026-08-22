@@ -17,6 +17,7 @@ private:
 	ViewData viewData;
 	Tab activeTab;
 	PlayerState playerState;
+	int playingSongId = -1;   // id de la cancion cargada en el reproductor
 	SoundAPI soundAPI;
 public:
 	EchoService() {
@@ -60,30 +61,46 @@ public:
 		return activeTab;
 	}
 
+	int getPlayingSongId() {
+		return playingSongId;
+	}
+
 	void setActiveTab(const Tab& tab) {
 		activeTab = tab;
 		buildViewData();
 	}	
 
 	void playSong(int idSong) {
-		if (soundAPI.load(getSongById(idSong).getSourcePath())) { }
-		else std::cout << "error";   
-		if (soundAPI.play()) { }
+		if (!soundAPI.load(getSongById(idSong).getSourcePath())) {
+			std::cout << "error";
+			return;
+		}
+		if (!soundAPI.play()) {
+			std::cout << "error";
+			return;
+		}
+		playingSongId = idSong;
+		playerState = PlayerState::PLAYING;
+		viewData.player.state = PlayerState::PLAYING;
 	}
 
 	void stopSong() {
-		if (soundAPI.stop()) { }
-		else std::cout << "error";
+		if (!soundAPI.stop()) std::cout << "error";
+		playingSongId = -1;
+		playerState = PlayerState::STOPPED;
+		viewData.player.state = PlayerState::STOPPED;
 	}
 
 	void resumeSong() {
-		if (soundAPI.resume()) { }
-		else std::cout << "error";
+		if (!soundAPI.resume()) { std::cout << "error"; return; }
+		playerState = PlayerState::PLAYING;
+		viewData.player.state = PlayerState::PLAYING;
 	}
 
 	void pauseSong() {
-		if (soundAPI.pause()) { }
-		else std::cout << "error";
+		if (!soundAPI.pause()) { std::cout << "error"; return; }
+		playerState = PlayerState::PAUSED;
+		viewData.player.state = PlayerState::PAUSED;
 	}
 
 	int getIdAtRow(int row) {
@@ -214,6 +231,7 @@ public:
 		if (!pl) return;
 
 		for (int idSong : pl->getSongsIds()) {
+			if (!library.containsSong(idSong)) continue; // id inexistente en la biblioteca: se omite
 			Song& song = library.getSongById(idSong);
 			RowData row;
 			row.title = song.getName();
@@ -361,6 +379,42 @@ public:
 		currAccount.setPlaylistOpen(false);
 		currAccount.setIndexOpenPlaylist(-1);
 		buildViewData();
+	}
+
+	bool playSelectedFromOpenPlaylist() {
+		Playlist* pl = getOpenPlaylist();
+		if (!pl) return false;
+
+		int id = pl->getSongIdAt(pl->getCurrentRowIndex() + pl->getTopRowIndex());
+		if (id == -1 || !library.containsSong(id)) return false;
+
+		pl->setCurrentSongId(id);
+		playSong(id);
+
+		Song& song = library.getSongById(id);
+		updatePlayerData(PlayerData{
+			song.getName(),
+			song.getAuthor(),
+			PlayerState::PLAYING,
+			song.getLength(),
+			0.0f
+		});
+		return true;
+	}
+
+	void toggleSelectedOpenPlaylistSongPlayback() {
+		Playlist* pl = getOpenPlaylist();
+		if (!pl) return;
+
+		int selId = pl->getSongIdAt(pl->getCurrentRowIndex() + pl->getTopRowIndex());
+		if (selId == -1 || selId != playingSongId) return; // la seleccionada no es la que suena
+
+		if (playerState == PlayerState::PAUSED) {
+			resumeSong();
+		}
+		else if (playerState == PlayerState::PLAYING) {
+			pauseSong();
+		}
 	}
 
 	//ALBUMS

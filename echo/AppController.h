@@ -185,6 +185,15 @@ private:
 			return mainPlaylistOpenRun(key);
 		}
 
+		if(key==13) { // Enter: abrir la playlist seleccionada
+			int absIdx = echoService.getTopRowIndex() + echoService.getCurrentRowIndex();
+			echoService.openPlaylistAt(absIdx);
+			const ViewData& vd = echoService.getViewData();
+			ui.updateTableHeader(vd);
+			ui.updateRows(vd);
+			return true;
+		}
+
 		if(key==27) { // Esc: salir guardando la cuenta
 			echoService.stopSong();
 			echoService.unloadAccountService();
@@ -205,7 +214,27 @@ private:
 	}
 
 	bool mainPlaylistOpenRun(int key) {
-		return false;
+		if (key == 27 || key == 8) { // Esc o Backspace: volver a la lista de playlists
+			echoService.closePlaylist();
+			const ViewData& vd = echoService.getViewData();
+			ui.updateTableHeader(vd);
+			ui.updateRows(vd);
+			return true;
+		}
+		if (key == 13) { // Enter: reproducir la cancion seleccionada
+			echoService.playSelectedFromOpenPlaylist();
+			ui.updateHud(echoService.getViewData());
+		}
+		if (key == 32) { // espacio: pausar/reanudar la seleccionada
+			echoService.toggleSelectedOpenPlaylistSongPlayback();
+		}
+		if (key == 72) { // flecha arriba
+			moveListSelection(-1);
+		}
+		if (key == 80) { // flecha abajo
+			moveListSelection(1);
+		}
+		return true;
 	}
 
 	void authFlow(bool isRegister) {

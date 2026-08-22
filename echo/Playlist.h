@@ -27,6 +27,11 @@ public:
 	int getCurrentSongId() { return currentSongId; }
 	int getCount() { return songsIds.getSize(); }
 
+	int getSongIdAt(int index) {
+		if (index < 0 || index >= (int)songsIds.getSize()) return -1;
+		return songsIds.getAt((size_t)index);
+	}
+
 	LinkedList<int>& getSongsIds() { return songsIds; }
 
 	void setIdPlaylist(int _id) { idPlaylist = _id; }
@@ -34,6 +39,7 @@ public:
 	void setVisibleRows(int row) { visibleRows = row; }
 	void setTopRowIndex(int row) { topRowIndex = row; }
 	void setCurrentRowIndex(int row) { currentRowIndex = row; }
+	void setCurrentSongId(int id) { currentSongId = id; }
 
 	// Misma semantica que Library::moveCursor (clamp + scroll de ventana).
 	void moveSongCursor(int delta) {

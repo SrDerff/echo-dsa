@@ -3,6 +3,7 @@
 #include <vector>
 #include <optional>
 #include <utility>
+#include <stdexcept>
 
 template<typename K, typename V, typename Hash = std::hash<K>>
 class HashTable {
@@ -154,6 +155,8 @@ public:
 
     V& getElement(const K& key) {
         size_t index = findIndex(key);
+        if (index == capacity)
+            throw std::out_of_range("HashTable::getElement: clave inexistente");
         return (bucket[index])->value;
     }
 
