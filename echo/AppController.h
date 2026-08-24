@@ -95,7 +95,7 @@ private:
 					return mainPlaylistGeneralRun(key);
 					break;
 				case Tab::LIKES:
-					// Implement likes handling here
+					return mainLikesRun(key);
 					break;
 				case Tab::RECOMMENDED:
 					// Implement recommended handling here
@@ -176,6 +176,53 @@ private:
 				echoService.resumeSong();
 				echoService.getViewData().player.state = PlayerState::PLAYING;
 			}
+		}
+		if (key == 43) { // '+': agregar la cancion seleccionada a una playlist
+			ui.showAddToPlaylistPrompt();
+			std::string plName;
+			std::getline(std::cin, plName);
+			ui.clearConsoleInputLine();
+
+			if (!plName.empty()) {
+				int res = echoService.addSelectedSongToPlaylist(plName);
+				switch (res) {
+				case 0: ui.showConsoleMessage("Agregada a '" + plName + "'", false); break;
+				case 1: ui.showConsoleMessage("Playlist '" + plName + "' creada. Cancion agregada.", false); break;
+				case 2: ui.showConsoleMessage("Ya estaba en '" + plName + "'", false); break;
+				default: ui.showConsoleMessage("No se pudo agregar.", true); break;
+				}
+			}
+		}
+		if (key == 76 || key == 108) { // L/l: toggle like de la cancion seleccionada
+			int res = echoService.toggleLikeSelectedLibrarySong();
+			const ViewData& vd = echoService.getViewData();
+			ui.updateRow(vd, echoService.getTopRowIndex() + echoService.getCurrentRowIndex() + 1);
+			if (res == 0) ui.showConsoleMessage("Agregada a Me gusta", false);
+			else if (res == 1) ui.showConsoleMessage("Quitada de Me gusta", false);
+		}
+		return true;
+	}
+
+	bool mainLikesRun(int key) {
+		if (key == 27) { // Esc: salir guardando la cuenta
+			echoService.stopSong();
+			echoService.unloadAccountService();
+			echoService.saveGeneralService();
+			echoService.logout();
+			return false;
+		}
+		if (key == 13) { // Enter: reproducir la cancion seleccionada
+			echoService.playSelectedLikeSong();
+			ui.updateHud(echoService.getViewData());
+		}
+		if (key == 32) { // espacio: pausar/reanudar la seleccionada
+			echoService.toggleSelectedLikeSongPlayback();
+		}
+		if (key == 72) { // flecha arriba
+			moveListSelection(-1);
+		}
+		if (key == 80) { // flecha abajo
+			moveListSelection(1);
 		}
 		return true;
 	}

@@ -71,6 +71,13 @@ public:
 		return songsIds.remove(songId);
 	}
 
+	bool containsSong(int songId) {
+		for (int id : songsIds) {
+			if (id == songId) return true;
+		}
+		return false;
+	}
+
 	size_t getSize() { return songsIds.getSize(); }
 
 };

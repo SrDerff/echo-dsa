@@ -42,7 +42,7 @@ public:
 		visibleRowsPlaylist = 17;
 		currentRowIndexLikes = 0;
 		topRowIndexLikes = 0;
-		visibleRowsLikes = 0;
+		visibleRowsLikes = 17;
 	}
 	
 	Account(int _id, std::string _user, std::string _password, bool _vip) {
@@ -57,7 +57,7 @@ public:
 		visibleRowsPlaylist = 17;
 		currentRowIndexLikes = 0;
 		topRowIndexLikes = 0;
-		visibleRowsLikes = 0;
+		visibleRowsLikes = 17;
 	}
 	
 	int getIdAccount() { return idAccount; }
@@ -105,6 +105,28 @@ public:
 		}
 		else {
 			currentRowIndexPlaylist = abs - topRowIndexPlaylist;
+		}
+	}
+
+	// Misma semantica que Library::moveCursor (clamp + scroll de ventana).
+	void moveLikesCursor(int delta) {
+		int count = (int)idsLikedSongs.getSize();
+		if (count <= 0) return;
+
+		int abs = topRowIndexLikes + currentRowIndexLikes + delta;
+		if (abs < 0) abs = 0;
+		if (abs >= count) abs = count - 1;
+
+		if (abs < topRowIndexLikes) {
+			topRowIndexLikes = abs;
+			currentRowIndexLikes = 0;
+		}
+		else if (abs >= topRowIndexLikes + visibleRowsLikes) {
+			topRowIndexLikes = abs - visibleRowsLikes + 1;
+			currentRowIndexLikes = visibleRowsLikes - 1;
+		}
+		else {
+			currentRowIndexLikes = abs - topRowIndexLikes;
 		}
 	}
 

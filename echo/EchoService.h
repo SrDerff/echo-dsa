@@ -251,7 +251,25 @@ public:
 	}
 
 	void buildLikesView(std::vector<RowData>& _rows) {
-	
+		std::vector<int> ids = currAccount.getLikedSongsOrdered();
+		for (int idSong : ids) {
+			if (!library.containsSong(idSong)) continue;
+			Song& song = library.getSongById(idSong);
+			RowData row;
+			row.title = song.getName();
+			row.artist = song.getAuthor();
+			row.genre = song.getGenre();
+			row.likes = song.getLikesCount();
+			row.isLiked = true;
+			row.duration = song.getLength();
+			row.isPlaying = (song.getIdSong() == library.getCurrentSongId());
+			row.isPlaylist = false;
+			row.playlistSize = -1;
+			_rows.push_back(row);
+		}
+
+		viewData.selectedIndex = currAccount.getCurrentRowIndexLikes() + currAccount.getTopRowIndexLikes() + 1;
+		viewData.topRowIndex = currAccount.getTopRowIndexLikes() + 1;
 	}
 
 	void updatePlayerData(const PlayerData& playerData) {
@@ -280,10 +298,63 @@ public:
 		return currAccount.removeDislikeSong(idSong);
 	}
 
+	// 0 like agregado | 1 like quitado | -1 error
+	int toggleLikeSelectedLibrarySong() {
+		int id = library.getCurrentSongId();
+		if (id == -1 || !library.containsSong(id)) return -1;
+
+		if (currAccount.getLikedSongs().contains(id)) {
+			removeLikeSong(id);
+		}
+		else {
+			likeSong(id);
+		}
+		buildViewData();
+		return currAccount.getLikedSongs().contains(id) ? 0 : 1;
+	}
+
+	// Reproduce la cancion con like seleccionada en el tab LIKES. Devuelve el id o -1.
+	int playSelectedLikeSong() {
+		std::vector<int> ids = currAccount.getLikedSongsOrdered(); // mismo orden que buildLikesView
+		int idx = currAccount.getCurrentRowIndexLikes() + currAccount.getTopRowIndexLikes();
+		if (idx < 0 || idx >= (int)ids.size()) return -1;
+
+		int id = ids[idx];
+		if (!library.containsSong(id)) return -1;
+
+		playSong(id);
+		Song& song = library.getSongById(id);
+		updatePlayerData(PlayerData{
+			song.getName(),
+			song.getAuthor(),
+			PlayerState::PLAYING,
+			song.getLength(),
+			0.0f
+		});
+		return id;
+	}
+
+	void toggleSelectedLikeSongPlayback() {
+		std::vector<int> ids = currAccount.getLikedSongsOrdered(); // mismo orden que buildLikesView
+		int idx = currAccount.getCurrentRowIndexLikes() + currAccount.getTopRowIndexLikes();
+		if (idx < 0 || idx >= (int)ids.size()) return;
+		if (ids[idx] != playingSongId) return; // la seleccionada no es la que suena
+
+		if (playerState == PlayerState::PAUSED) {
+			resumeSong();
+		}
+		else if (playerState == PlayerState::PLAYING) {
+			pauseSong();
+		}
+	}
+
 	//INDEXS
-	int getVisibleRows() { 
+	int getVisibleRows() {
 		if (activeTab == Tab::LIBRARY) {
-			return library.getVisibleRows(); 
+			return library.getVisibleRows();
+		}
+		if (activeTab == Tab::LIKES) {
+			return currAccount.getVisibleRowsLikes();
 		}
 		if (activeTab == Tab::PLAYLISTS) {
 			Playlist* pl = getOpenPlaylist();
@@ -297,6 +368,9 @@ public:
 		if(activeTab == Tab::LIBRARY) {
 			return library.getTopRowIndex();
 		}
+		if(activeTab == Tab::LIKES) {
+			return currAccount.getTopRowIndexLikes();
+		}
 		if(activeTab == Tab::PLAYLISTS) {
 			Playlist* pl = getOpenPlaylist();
 			if (pl) return pl->getTopRowIndex();
@@ -308,6 +382,9 @@ public:
 	int getCurrentRowIndex() {
 		if(activeTab == Tab::LIBRARY) {
 			return library.getCurrentRowIndex();
+		}
+		if(activeTab == Tab::LIKES) {
+			return currAccount.getCurrentRowIndexLikes();
 		}
 		if(activeTab == Tab::PLAYLISTS) {
 			Playlist* pl = getOpenPlaylist();
@@ -342,6 +419,9 @@ public:
 		else if (activeTab == Tab::PLAYLISTS && !currAccount.isPlaylistOpen()) {
 			currAccount.movePlaylistCursor(delta);
 		}
+		else if (activeTab == Tab::LIKES) {
+			currAccount.moveLikesCursor(delta);
+		}
 		else if (Playlist* pl = getOpenPlaylist()) {
 			pl->moveSongCursor(delta);
 		}
@@ -352,6 +432,24 @@ public:
 
 	bool addSongToPlaylist(std::string plName, int idSong) {
 		return currAccount.addSongToPlaylist(plName, idSong);
+	}
+
+	// 0 agregada a existente | 1 playlist creada + agregada | 2 ya estaba | -1 error
+	int addSelectedSongToPlaylist(const std::string& plName) {
+		int idSong = library.getCurrentSongId();
+		if (idSong == -1 || !library.containsSong(idSong)) return -1;
+
+		int idx = currAccount.getIndexPlaylistByName(plName);
+		bool existed = (idx != -1);
+		if (!existed) {
+			if (!createPlaylist(plName)) return -1;
+			idx = currAccount.getIndexPlaylistByName(plName);
+			if (idx == -1) return -1;
+		}
+
+		if (currAccount.getPlaylists()[idx].containsSong(idSong)) return 2;
+
+		return currAccount.addSongToPlaylist(plName, idSong) ? (existed ? 0 : 1) : -1;
 	}
 
 	bool removeSongFromPlaylist(std::string plName, int idSong) {

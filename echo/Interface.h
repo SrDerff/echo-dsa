@@ -269,6 +269,31 @@ public:
 		std::cout << std::flush;
 	}
 
+	void showAddToPlaylistPrompt() {
+		ensureInit();
+		fillRect(4, 54, 46, 1, ' ', PANEL_R, PANEL_G, PANEL_B, PANEL_R, PANEL_G, PANEL_B);
+		paint(4, 54, "[+] Playlist:", SOFT_R, SOFT_G, SOFT_B, PANEL_R, PANEL_G, PANEL_B);
+		setPos(18, 54);
+		std::cout << "\x1b[?25h" << std::flush;
+	}
+
+	void clearConsoleInputLine() {
+		ensureInit();
+		std::cout << "\x1b[?25l";
+		fillRect(4, 54, 46, 1, ' ', PANEL_R, PANEL_G, PANEL_B, PANEL_R, PANEL_G, PANEL_B);
+		std::cout << std::flush;
+	}
+
+	void showConsoleMessage(const std::string& msg, bool isError) {
+		ensureInit();
+		fillRect(4, 54, 46, 1, ' ', PANEL_R, PANEL_G, PANEL_B, PANEL_R, PANEL_G, PANEL_B);
+		int fr = isError ? 255 : 137;
+		int fg = isError ? 90 : 172;
+		int fb = isError ? 90 : 118;
+		paint(4, 54, fit(msg, 44), fr, fg, fb, PANEL_R, PANEL_G, PANEL_B);
+		std::cout << std::flush;
+	}
+
 private:
 	// ==== barra de tabs ====
 	struct TabInfo {
@@ -338,17 +363,19 @@ private:
 
 		std::string c1 = fit(rd.artist, 30);
 		if (pl && rd.artist.empty()) c1 = "You";
-		std::string c2 = fit(rd.title, 45);
+		std::string c2 = fit(rd.title, rd.isLiked ? 43 : 45);
 		std::string c3 = thirdValue(rd, data.activeTab);
 
 		if (sel) {
 			paint(4, yy, c1, TITLE_R, TITLE_G, TITLE_B, r, g, b);
-			paint(41, yy, c2, TITLE_R, TITLE_G, TITLE_B, r, g, b);
+			if (rd.isLiked) paint(41, yy, "\xE2\x99\xA5", ACCENT_R, ACCENT_G, ACCENT_B, r, g, b);
+			paint(rd.isLiked ? 44 : 41, yy, c2, TITLE_R, TITLE_G, TITLE_B, r, g, b);
 			paint(112, yy, c3, TITLE_R, TITLE_G, TITLE_B, r, g, b);
 		}
 		else {
 			paint(4, yy, c1, SOFT_R, SOFT_G, SOFT_B, r, g, b);
-			paint(41, yy, c2, SOFT_R, SOFT_G, SOFT_B, r, g, b);
+			if (rd.isLiked) paint(41, yy, "\xE2\x99\xA5", ACCENT_R, ACCENT_G, ACCENT_B, r, g, b);
+			paint(rd.isLiked ? 44 : 41, yy, c2, SOFT_R, SOFT_G, SOFT_B, r, g, b);
 			paint(112, yy, c3, SOFT_R, SOFT_G, SOFT_B, r, g, b);
 		}
 	}
